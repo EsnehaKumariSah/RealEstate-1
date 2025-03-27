@@ -13,7 +13,7 @@ const Menuitem = [
     {
        icon: "/sidebar/businessman.png",
        label: "seller",
-       href: "/list/subjects",
+       href: "/seller",
       },
     {
       icon: "/sidebar/agender.png",

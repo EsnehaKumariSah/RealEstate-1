@@ -3,12 +3,12 @@ import Seller from "../models/seller.js";
 export const createSeller = async (req, res) => {//controller hai
     try {// use for  catch error
 
-        const {  name,     email,     phone,     address ,   sellerId ,    ListedPrice , status} = req.body;
-        if(!name || !email || !phone|| !address|| !sellerId|| !ListedPrice||!status) {
+        const { name, email, phone, address,propertyId,ListedPrice, status } = req.body;
+        if(!name || !email || !phone|| !address  || !propertyId ||! ListedPrice|| !status) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
 
-        await Seller.create({ name,     email,     phone,     address ,   sellerId ,    ListedPrice , status})
+        await Seller.create({name, email, phone, address,propertyId,ListedPrice, status})
         res.status(201).json({
             message: 'Seller created successfully'
         });
@@ -42,7 +42,7 @@ export const getSellerById = async (req, res) => {
 
 export const updateSeller = async (req, res) => {
     try {
-        const {  name,     email,     phone,     address ,   sellerId ,    ListedPrice , status} = req.body;
+        const { name, email, phone, address,propertyId,ListedPrice, status  } = req.body;
         const SellerId = req.params.id; 
 
         const existingSeller = await Seller.findById(SellerId);
@@ -51,7 +51,7 @@ export const updateSeller = async (req, res) => {
         }
 
         const updateData = {
-            name,     email,     phone,     address ,   sellerId ,    ListedPrice , status
+            name, email, phone, address,propertyId,ListedPrice, status
         };
 
         const updatedSeller = await Seller.findByIdAndUpdate(

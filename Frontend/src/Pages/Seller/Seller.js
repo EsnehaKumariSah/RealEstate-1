@@ -5,7 +5,7 @@ import { Visibility, Edit, Delete } from "@mui/icons-material";
 const TableWithDropdown = () => {
   const [data, setData] = useState([
     { id: 1, name: "Rahul Sharma", email: "rahul@gmail.com", phone: "23467889", address: "Adityapur",propertyId:"P-12345	 " ,ListedPrice:" ₹1,20,00,000",  status: "Active" },
-    { id: 2, name: "Neha Verma", email: "neha@gmail.com", phone: "9876543210", address: "Ranchi",propertyId:"P-67890	 " ,ListedPrice:" ₹75,00,000	", status: "InActive"},
+    { id: 2, name: "Neha Verma", email: "neha@gmail.com", phone: "9876543210", address: "Ranchi",propertyId:"P-6787" ,ListedPrice:" ₹75,00,000	", status: "InActive"},
     { id: 3, name: "Amit Kumar", email: "amit@gmail.com", phone: "8765432109", address: "Jamshedpur",propertyId:"p-4567" ,ListedPrice:"₹67000", status: "Active" },
   ]);
 

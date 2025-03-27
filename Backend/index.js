@@ -9,6 +9,7 @@ import bookingRouter from './routes/bookingRoute.js';
  import financeRouter from './routes/financeRoute.js';
  import leaseRouter from './routes/leaseRoute.js';
  import propertyRouter from './routes/propertyRoute.js';
+ import sellerRouter from './routes/sellerRoute.js';
 // import sellerRouter from './routes/sellerRoute.js';
  import { createAgent } from './controllers/agentController.js';
 dotenv.config();
@@ -23,7 +24,7 @@ app.use("/buyers", buyersRouter)
  app.use("/finance", financeRouter)
  app.use("/lease", leaseRouter)
 app.use("/property", propertyRouter)
-app.use("/seller", propertyRouter)
+app.use("/seller", sellerRouter)
 //  app.use("/seller", sellerRouter)
 
 app.get('/',(req,res) =>{
