@@ -3,12 +3,12 @@ import Property from "../models/Property.js";
 export const createProperty = async (req, res) => {//controller hai
     try {// use for  catch error
 
-        const { propertyTitle, propertyType, address,  price, areasqrt, furnishing, status } = req.body;
-        if(!propertyTitle || !propertyType || !address|| !price|| !areasqrt|| !furnishing ||!status) {
+        const {  propertyTitle, propertyType, address, price, areaSqft, furnishing, status } = req.body;
+        if(!propertyTitle || !propertyType || !address|| !price|| !areaSqft|| !furnishing ||!status) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
 
-        await Property.create({propertyTitle, propertyType, address,  price, areasqrt, furnishing, status })
+        await Property.create({ propertyTitle, propertyType, address, price, areaSqft, furnishing, status })
         res.status(201).json({
             message: 'Property created successfully'
         });
@@ -42,7 +42,7 @@ export const getPropertyById = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
     try {
-        const { propertyTitle, propertyType, address,  price, areasqrt, furnishing, status } = req.body;
+        const {  propertyTitle, propertyType, address, price, areaSqft, furnishing, status} = req.body;
         const propertyId = req.params.id; 
 
         const existingProperty = await Property.findById(propertyId);
@@ -51,7 +51,7 @@ export const updateProperty = async (req, res) => {
         }
 
         const updateData = {
-            propertyTitle, propertyType, address,  price, areasqrt, furnishing, status 
+            propertyTitle, propertyType, address, price, areaSqft, furnishing, status
         };
 
         const updatedProperty = await Property.findByIdAndUpdate(

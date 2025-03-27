@@ -3,8 +3,8 @@ import Lease from "../models/Lease.js";
 export const createLease = async (req, res) => {//controller hai
     try {// use for  catch error
 
-        const { Name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus } = req.body;
-        if(!Name || !email || !phone|| !address || !StartDate|| !EndDate || !MonthlyRent||! Deposite|| !status||!Lstatus) {
+        const { name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus } = req.body;
+        if(!name || !email || !phone|| !address || !StartDate|| !EndDate || !MonthlyRent||! Deposite|| !status||!Lstatus) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
 
@@ -42,7 +42,7 @@ export const getLeaseById = async (req, res) => {
 
 export const updateLease = async (req, res) => {
     try {
-        const { Name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus } = req.body;
+        const { name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus } = req.body;
         const leaseId = req.params.id; 
 
         const existingLease = await Lease.findById(leaseId);
@@ -51,7 +51,7 @@ export const updateLease = async (req, res) => {
         }
 
         const updateData = {
-            Name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus 
+            name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus 
         };
 
         const updatedLease = await Lease.findByIdAndUpdate(

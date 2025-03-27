@@ -3,12 +3,12 @@ import Buyers from "../models/Buyers.js";
 export const createBuyers = async (req, res) => {//controller hai
     try {// use for  catch error
 
-        const { Name, email, phone, address, Room, status } = req.body;
-        if(!Name || !email || !phone|| !address  || !Room|| !status) {
+        const { name, email, phone, address, Room, status } = req.body;
+        if(!name || !email || !phone|| !address  || !Room|| !status) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
 
-        await Buyers.create({Name, email, phone, address, Room, status})
+        await Buyers.create({name, email, phone, address, Room, status})
         res.status(201).json({
             message: 'Buyers created successfully'
         });
@@ -42,7 +42,7 @@ export const getBuyersById = async (req, res) => {
 
 export const updateBuyers = async (req, res) => {
     try {
-        const {  Name, email, phone, address, Room, status  } = req.body;
+        const {  name, email, phone, address, Room, status  } = req.body;
         const buyersId = req.params.id; 
 
         const existingBuyers = await Buyers.findById(buyersId);
@@ -51,7 +51,7 @@ export const updateBuyers = async (req, res) => {
         }
 
         const updateData = {
-            Name, email, phone, address, Room, status 
+            name, email, phone, address, Room, status 
         };
 
         const updatedBuyers = await Buyers.findByIdAndUpdate(

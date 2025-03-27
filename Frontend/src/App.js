@@ -8,6 +8,7 @@ import LayoutAgent from "./Layout/LayoutAgent";
 import LayoutBuyers from "./Layout/LayoutBuyers";
 import LayoutLease from "./Layout/LayoutLease";
 import LayoutFinance from "./Layout/LayoutFinance";
+import LayoutSeller from "./Layout/LayoutSeller";
 function App() {
   return (
     <BrowserRouter>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/Buyers" element={<LayoutBuyers/>}/>
         <Route path="/Lease" element={<LayoutLease/>}/>
         <Route path="/Finance" element={<LayoutFinance/>}/>
+        <Route path="/Seller" element={<LayoutSeller/>}/>
       </Routes>
     </BrowserRouter>
   );

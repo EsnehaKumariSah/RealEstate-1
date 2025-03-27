@@ -3,12 +3,12 @@ import Booking from "../models/Booking.js";
 export const createBooking = async (req, res) => {//controller hai
     try {// use for  catch error
 
-        const {Name, email, phone, address, checkIN, checkOut, status, Bstatus} = req.body;
-        if(!Name || !email || !phone|| !address || !checkIN|| !checkOut || !status|| !Bstatus) {
+        const {name, email, phone, address, checkIN, checkOut, status, Bstatus} = req.body;
+        if(!name || !email || !phone|| !address || !checkIN|| !checkOut || !status|| !Bstatus) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
 
-        await Booking.create({Name, email, phone, address, checkIN, checkOut, status, Bstatus})
+        await Booking.create({name, email, phone, address, checkIN, checkOut, status, Bstatus})
         res.status(201).json({
             message: 'Booking created successfully'
         });
@@ -42,7 +42,7 @@ export const getBookingById = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
     try {
-        const { Name, email, phone, address, checkIN, checkOut, status, Bstatus } = req.body;
+        const { name, email, phone, address, checkIN, checkOut, status, Bstatus } = req.body;
         const bookingId = req.params.id; 
 
         const existingBooking = await Booking.findById(bookingId);
@@ -51,7 +51,7 @@ export const updateBooking = async (req, res) => {
         }
 
         const updateData = {
-            Name, email, phone, address, checkIN, checkOut, status, Bstatus
+            name, email, phone, address, checkIN, checkOut, status, Bstatus
         };
 
         const updatedBooking = await Booking.findByIdAndUpdate(

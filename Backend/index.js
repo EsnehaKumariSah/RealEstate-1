@@ -14,13 +14,16 @@ import bookingRouter from './routes/bookingRoute.js';
 dotenv.config();
 const app = express();
 const PORT =process.env.PORT || 3001;
- 
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json());
 app.use("/agent", agentRouter)
 app.use("/booking", bookingRouter)
 app.use("/buyers", buyersRouter)
  app.use("/finance", financeRouter)
  app.use("/lease", leaseRouter)
 app.use("/property", propertyRouter)
+app.use("/seller", propertyRouter)
 //  app.use("/seller", sellerRouter)
 
 app.get('/',(req,res) =>{
