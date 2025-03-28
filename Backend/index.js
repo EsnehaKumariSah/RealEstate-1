@@ -18,6 +18,8 @@ const PORT =process.env.PORT || 3001;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+
+
 app.use("/agent", agentRouter)
 app.use("/booking", bookingRouter)
 app.use("/buyers", buyersRouter)
@@ -26,7 +28,7 @@ app.use("/buyers", buyersRouter)
 app.use("/property", propertyRouter)
 app.use("/seller", sellerRouter)
 //  app.use("/seller", sellerRouter)
-
+connectDb();
 app.get('/',(req,res) =>{
     res.send("hello world")
 })
