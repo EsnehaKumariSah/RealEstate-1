@@ -16,7 +16,9 @@ const leaseSchema = new Schema({
     status:{type:String},
     Lstatus:{type:String},
   
-}, { timestamps: true }); // Correct placement of timestamps
+},
+ { timestamps: true }
+ ); // Correct placement of timestamps
 
 const Lease = model('Lease', leaseSchema);
 

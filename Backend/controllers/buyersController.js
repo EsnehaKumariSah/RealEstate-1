@@ -10,6 +10,7 @@ export const createBuyers = async (req, res) => {//controller hai
 
         await Buyers.create({name, email, phone, address, Room, status})
         res.status(201).json({
+            success:true,
             message: 'Buyers created successfully'
         });
     } catch (error) {
@@ -61,6 +62,7 @@ export const updateBuyers = async (req, res) => {
         );
 
         res.json({
+            success:true,
             message: 'Buyers updated successfully',
             buyers: updatedBuyers
         });
@@ -76,7 +78,9 @@ export const deleteBuyers = async (req, res) => {
         if (!deletedBuyers) {
             return res.status(404).json({ message: 'Buyers not found' });
         }
-        res.json({ message: 'Buyers deleted successfully' });
+        res.json({ 
+            success:true,
+            message: 'Buyers deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

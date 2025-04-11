@@ -10,6 +10,7 @@ export const createBooking = async (req, res) => {//controller hai
 
         await Booking.create({name, email, phone, address, checkIN, checkOut, status, Bstatus})
         res.status(201).json({
+            success:true,
             message: 'Booking created successfully'
         });
     } catch (error) {
@@ -61,6 +62,7 @@ export const updateBooking = async (req, res) => {
         );
 
         res.json({
+            success:true,
             message: 'Booking updated successfully',
             booking: updatedBooking
         });
@@ -76,7 +78,9 @@ export const deleteBooking = async (req, res) => {
         if (!deletedBooking) {
             return res.status(404).json({ message: 'Booking not found' });
         }
-        res.json({ message: 'Booking deleted successfully' });
+        res.json({
+            success:true,
+            message: 'Booking deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

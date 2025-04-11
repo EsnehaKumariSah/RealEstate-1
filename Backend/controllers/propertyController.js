@@ -10,6 +10,7 @@ export const createProperty = async (req, res) => {//controller hai
 
         await Property.create({ propertyTitle, propertyType, address, price, areaSqft, furnishing, status })
         res.status(201).json({
+            success:true,
             message: 'Property created successfully'
         });
     } catch (error) {
@@ -61,6 +62,7 @@ export const updateProperty = async (req, res) => {
         );
 
         res.json({
+            success:true,
             message: 'Property updated successfully',
             property: updatedProperty
         });
@@ -76,7 +78,9 @@ export const deleteProperty = async (req, res) => {
         if (!deletedProperty) {
             return res.status(404).json({ message: 'Property not found' });
         }
-        res.json({ message: 'Property deleted successfully' });
+        res.json({
+            success:true,
+             message: 'Property deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

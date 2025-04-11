@@ -10,8 +10,9 @@ import bookingRouter from './routes/bookingRoute.js';
  import leaseRouter from './routes/leaseRoute.js';
  import propertyRouter from './routes/propertyRoute.js';
  import sellerRouter from './routes/sellerRoute.js';
-// import sellerRouter from './routes/sellerRoute.js';
+ import userRouter from './routes/userRoute.js';
  import { createAgent } from './controllers/agentController.js';
+ 
 dotenv.config();
 const app = express();
 const PORT =process.env.PORT || 3001;
@@ -24,10 +25,10 @@ app.use("/agent", agentRouter)
 app.use("/booking", bookingRouter)
 app.use("/buyers", buyersRouter)
  app.use("/finance", financeRouter)
- app.use("/lease", leaseRouter)
+ app.use("/lease", leaseRouter)     
 app.use("/property", propertyRouter)
 app.use("/seller", sellerRouter)
-//  app.use("/seller", sellerRouter)
+  app.use("/user", userRouter)
 connectDb();
 app.get('/',(req,res) =>{
     res.send("hello world")

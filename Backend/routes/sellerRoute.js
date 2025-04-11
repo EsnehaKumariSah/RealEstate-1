@@ -1,5 +1,5 @@
 import express from 'express';
-import { createSeller, getAllSeller, getSellerById, updateSeller, deleteSeller } from "../controllers/SellerController.js";
+import { createSeller, getAllSeller, getSellerById, updateSeller, deleteSeller } from "../controllers/sellerController.js";
 const router = express.Router();
 // import auth, { authorizeRole } from '../config/auth.js';
 

@@ -10,6 +10,7 @@ export const createLease = async (req, res) => {//controller hai
 
         await Lease.create({name, email, phone, address, StartDate, EndDate, MonthlyRent ,Deposite, status ,Lstatus })
         res.status(201).json({
+            success:true,
             message: 'Lease created successfully'
         });
     } catch (error) {
@@ -61,6 +62,7 @@ export const updateLease = async (req, res) => {
         );
 
         res.json({
+            success:true,
             message: 'Lease updated successfully',
             Lease: updatedLease
         });
@@ -76,7 +78,9 @@ export const deleteLease = async (req, res) => {
         if (!deletedLease) {
             return res.status(404).json({ message: 'Lease not found' });
         }
-        res.json({ message: 'Lease deleted successfully' });
+        res.json({ 
+            success:true,
+            message: 'Lease deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -10,6 +10,7 @@ export const createAgent = async (req, res) => {//controller hai
 
         await Agent.create({name, email, phone, address, license, Experience, Rate, status})
         res.status(201).json({
+            success:true,
             message: 'Agent created successfully'
         });
     } catch (error) {
@@ -61,6 +62,7 @@ export const updateAgent = async (req, res) => {
         );
 
         res.json({
+            success:true, 
             message: 'Agent updated successfully',
             agent: updatedAgent
         });
@@ -76,7 +78,9 @@ export const deleteAgent = async (req, res) => {
         if (!deletedAgent) {
             return res.status(404).json({ message: 'Agent not found' });
         }
-        res.json({ message: 'Agent deleted successfully' });
+        res.json({
+            success:true,
+            message: 'Agent deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

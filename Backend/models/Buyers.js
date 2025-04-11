@@ -14,7 +14,9 @@ const buyersSchema = new Schema({
   
 
   
-}, { timestamps: true }); // Correct placement of timestamps
+},
+ { timestamps: true }
+); // Correct placement of timestamps
 
 const Buyers = model('Buyers',buyersSchema);
 

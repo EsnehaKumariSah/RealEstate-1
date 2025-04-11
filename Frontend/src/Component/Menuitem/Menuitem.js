@@ -1,27 +1,28 @@
 const Menuitem = [
     
     {
-        icon: '/sidebar/dashboard.png',
+        icon: '/sidebar/Dash.png',
         label: "Dashboard",
         href: "/",
+        
     },
     {
-      icon: '/sidebar/property.png',
+      icon: '/sidebar/house.png',
       label: "Property",
       href: "/property",
     },
     {
-       icon: "/sidebar/businessman.png",
+       icon: "/sidebar/seller.png",
        label: "seller",
        href: "/seller",
       },
     {
-      icon: "/sidebar/agender.png",
+      icon: "/sidebar/realtor.png",
       label: " agent",
       href: "/agent",
     },
     {
-      icon: "/sidebar/for-rent.png",
+      icon: "/sidebar/rent.png",
       label: "lease",
       href: "/lease",
     },
@@ -29,14 +30,15 @@ const Menuitem = [
       icon: "/sidebar/booking.png",
       label: "Booking",
       href: "/Booking",
+      
     },
     {
-      icon: "/sidebar/salary.png",
+      icon: "/sidebar/money.png",
       label: "Finance",
       href: "/finance",
     },
     {
-      icon:"/sidebar/buyer.png",
+      icon:"/sidebar/customer.png",
       label:"Buyers",
       href:"/buyers",
 

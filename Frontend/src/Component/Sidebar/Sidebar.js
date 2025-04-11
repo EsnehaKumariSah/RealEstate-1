@@ -31,7 +31,7 @@ const Sidebar=()=>
               alt={item.label} 
               width={20} 
               height={20} 
-              // style={{ filter: "brightness(0) invert(1)" }}
+               style={{ filter: "brightness(0) invert(1)" }}
             />
           {isSmScreen?null:  <span className="menu-label">{item.label}</span>}
           </NavLink>

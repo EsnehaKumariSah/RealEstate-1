@@ -13,7 +13,6 @@ const agentSchema = new Schema({
       Experience:{type: String},
        Rate:{type:Number},
        status:{type: String},
-  
 }, { timestamps: true }); // Correct placement of timestamps
 
 const Agent = model('Agent', agentSchema);

@@ -35,8 +35,6 @@ const Search = () => {
     Add New
   </Button>
   
-
-  
   </div>
   
       )

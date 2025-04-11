@@ -14,7 +14,8 @@ const bookingSchema = new Schema({
     status:{type:String},
     Bstatus:{type:String},
   
-}, { timestamps: true }); // Correct placement of timestamps
+},
+ { timestamps: true }); // Correct placement of timestamps
 
 const Booking = model('Booking', bookingSchema);
 

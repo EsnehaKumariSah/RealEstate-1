@@ -12,7 +12,9 @@ const propertySchema = new Schema({
     areaSqft:{type:Number}, 
     furnishing:{type:String},
      status:{type:String},  
-}, { timestamps: true }); // Correct placement of timestamps
+}, 
+{ timestamps: true }
+); // Correct placement of timestamps
 
 const Property= model('Property',propertySchema);
 

@@ -15,7 +15,9 @@ const financeSchema = new Schema({
   
 
   
-}, { timestamps: true }); // Correct placement of timestamps
+}, 
+{ timestamps: true }
+); // Correct placement of timestamps
 
 const Finance = model('Finance',financeSchema);
 

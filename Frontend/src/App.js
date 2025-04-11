@@ -9,9 +9,11 @@ import LayoutBuyers from "./Layout/LayoutBuyers";
 import LayoutLease from "./Layout/LayoutLease";
 import LayoutFinance from "./Layout/LayoutFinance";
 import LayoutSeller from "./Layout/LayoutSeller";
+import {ToastContainer} from "react-toastify";
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer/>
       <Routes>
 
         <Route path="/SignIn" element={<SignIn />}/>
