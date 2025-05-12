@@ -4,8 +4,8 @@ import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const userSchema = new Schema({
-  emailId:{type:String},
-  password:{type:String},
+  Email:{type:String},
+  Password:{type:String},
   
 },{ timestamps: true }
 ); // Correct placement of timestamps

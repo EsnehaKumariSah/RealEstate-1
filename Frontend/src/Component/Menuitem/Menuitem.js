@@ -43,6 +43,16 @@ const Menuitem = [
       href:"/buyers",
 
     },
+    {
+      icon:"/sidebar/siteVisit.png",
+      label:"Site Visit",
+      href:"/siteVisit",
+    },
+    {
+      icon:"/sidebar/project.png",
+      label:"Project",
+      href:"/project",
+    }
 
 ];
 

@@ -11,7 +11,9 @@ import bookingRouter from './routes/bookingRoute.js';
  import propertyRouter from './routes/propertyRoute.js';
  import sellerRouter from './routes/sellerRoute.js';
  import userRouter from './routes/userRoute.js';
- import { createAgent } from './controllers/agentController.js';
+ import siteVisitRouter from './routes/siteVisitRoute.js';
+
+ import ProjectRouter  from "./routes/ProjectRoute.js"
  
 dotenv.config();
 const app = express();
@@ -29,6 +31,8 @@ app.use("/buyers", buyersRouter)
 app.use("/property", propertyRouter)
 app.use("/seller", sellerRouter)
   app.use("/user", userRouter)
+  app.use("/siteVisit", siteVisitRouter)
+ app.use("/project",ProjectRouter)
 connectDb();
 app.get('/',(req,res) =>{
     res.send("hello world")

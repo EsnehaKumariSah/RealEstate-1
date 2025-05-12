@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+  InputLabel,
+  FormControl,
+  InputAdornment,
   Table,
-  TableHead,
-  TableBody,
-  Paper,
-  TableRow,
-  TableCell,
   Select,
   MenuItem,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
   IconButton,
   Modal,
   Box,
@@ -16,8 +18,7 @@ import {
   TextField,
   Button,
   TableContainer,
-  FormControl,
-  InputLabel,
+  Paper,
 } from "@mui/material";
 import {
   Visibility,
@@ -25,50 +26,14 @@ import {
   Delete,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import axios from "axios";
-import { InputAdornment } from "@mui/material";
-
 import SearchIcon from "@mui/icons-material/Search";
+import TablePagination from "@mui/material/TablePagination";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "axios";
 import { toast } from "react-toastify";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-const TableWithDropdown = () => {
-  const [data, setData] = useState([
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      email: "rahul@gmail.com",
-      phone: "23467889",
-      address: "Adityapur",
-      checkIN: "2nd March",
-      checkOut: "10th March",
-      status: "pending",
-      Bstatus: "confirmed",
-    },
-    {
-      id: 2,
-      name: "Neha Verma",
-      email: "neha@gmail.com",
-      phone: "9876543210",
-      address: "Ranchi",
-      checkIN: "5th March",
-      checkOut: "12th March",
-      status: "paid",
-      Bstatus: "cancled",
-    },
-    {
-      id: 3,
-      name: "Amit Kumar",
-      email: "amit@gmail.com",
-      phone: "8765432109",
-      address: "Jamshedpur",
-      checkIN: "7th March",
-      checkOut: "15th March",
-      status: "overview",
-      Bstatus: "complete",
-    },
-  ]);
+const BookingTable = () => {
   const modalStyle = {
     position: "absolute",
     top: "50%",
@@ -80,151 +45,80 @@ const TableWithDropdown = () => {
     boxShadow: 24,
     p: 4,
     borderRadius: 1,
-    maxHeight: "70vh",
+    maxHeight: "90vh",
     overflow: "auto",
   };
 
   const deleteModalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    ...modalStyle,
     width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    borderRadius: 1,
-    textAlign: "center",
+    // textAlign: 'center'
   };
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedbooking, setSelectedbooking] = useState(null);
+  const [SelectedBookings, setSelectedBookings] = useState(null);
   const [editFormData, setEditFormData] = useState({});
-  const [bookings, setBookings] = useState([]);
+  const [Bookings, setBookings] = useState([]);
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    email: "",
+    mobileNo: "",
+    address: "",
+    check_in_date: "",
+    check_out_date: "",
+    TotalAmountUnit: "",
+    paymentStatus: "",
+    Bookingstatus: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
-  const [apiBooking, setApiBooking] = useState([]);
-  const [addFormData,setAddFormData] =useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    checkIN: '',
-    checkOut:'',
-    status:'pending',
-    Bstatus: '',
-    })
-    const [addModalOpen,setAddModalOpen]=useState(false);
-  
-    const navigate =useNavigate();
+  const [apiBookings, setApiBookings] = useState([]);
 
+  const navigate = useNavigate();
+  const handleAddBooking = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:3001/booking/createBooking`,
+        addFormData
+      );
+      if (res.data.success) {
+        toast.success("Booking added successfully!");
+        handleCloseAddModal();
+        getAllBooking();
+        //reset form data
+        setAddFormData({});
+      }
+    } catch (error) {
+      console.error("error adding Booking", error);
+      toast.error(error.response?.data?.message || "failed to add Booking");
+    }
+  };
   const getAllBooking = async () => {
     try {
       const res = await axios.get(
         `http://localhost:3001/booking/getAllBooking`
       );
-      console.log("response", res.data);
+      console.log(res.data);
       setBookings(res.data);
-      setApiBooking(res.data);
+      setApiBookings(res.data);
     } catch (error) {
-      console.log(error);
+      console.log("error");
     }
   };
   useEffect(() => {
     getAllBooking();
   }, []);
-  // const getAllbooking = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       `http://localhost:3001/booking/getAllbooking`
-  //     );
-  //     console.log("response", res.data);
-  //     setProperties(res.data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getAllbooking();
-  // }, []);
-  const handleView = (booking) => {
-    setSelectedbooking(booking);
-    setViewModalOpen(true);
-  };
-
-  const handleEdit = (booking) => {
-    setSelectedbooking(booking);
-    setEditFormData(booking);
-    setEditModalOpen(true);
-  };
-
-  const handleDelete = (booking) => {
-    setSelectedbooking(booking);
-    setDeleteModalOpen(true);
-  };
-  const handleAddNew=()=>{
-    setAddModalOpen(true);
-  }
-  const handleCloseViewModal = () => {
-    setViewModalOpen(false);
-    setSelectedbooking(null);
-  };
-  const handleCloseEditModal = () => {
-    setEditModalOpen(false);
-    setSelectedbooking(null);
-    setEditFormData({});
-  };
-
-  const handleCloseDeleteModal = () => {
-    setDeleteModalOpen(false);
-    setSelectedbooking(null);
-  };
-  const handleCloseAddModal =()=> setAddModalOpen(false);
-
-  const handleEditInputChange = (field) => (event) => {
-    setEditFormData({
-      ...editFormData,
-      [field]: event.target.value,
-    });
-  };
- const handleAddInputChange =(field) => (event) =>{
-    setAddFormData({
-      ...addFormData,
-      [field]:event.target.value,
-    });
-  };
-  const handleAddBooking= async () => {
-    try {
-      const response = await axios.post('http://localhost:3001/booking/createBooking', addFormData);
-      if (response.data.success) {
-        toast.success(' added booking successfully!');
-        handleCloseAddModal();
-        getAllBooking();
-        // Reset form data
-        setAddFormData({
-          name: '',
-          email: '',
-          phone: '',
-          address: '',
-          checkIN: '',
-          checkOut:'',
-          status:'pending',
-          Bstatus: '',
-        });
-      }
-    } catch (error) {
-      console.error('Error adding booking:', error);
-      toast.error(error.response?.data?.message || 'Failed to add booking');
-    }
-  };
   const handleUpdate = async () => {
     handleCloseEditModal();
-    // console.log("selected property ", selectedProperty);
-    
+    // console.log("selected Booking", SelectedBookings);
+
     try {
       const res = await axios.put(
-       ` http://localhost:3001/booking/updateBooking/${selectedbooking._id}`, editFormData
+        `http://localhost:3001/booking/updateBooking/${SelectedBookings._id}`,
+        editFormData
       );
       if (res.data.success) {
         toast.success(res.data.message);
@@ -237,60 +131,75 @@ const TableWithDropdown = () => {
     }
   };
 
-
   const handleConfirmDelete = async () => {
-  
-    // Here you would typically make an API call to delete the booking
     handleCloseDeleteModal();
-    try{
-     const res=await axios.delete(`http://localhost:3001/booking/deleteBooking/${selectedbooking._id}`);
-     if(res.data.success){
-      toast.success(res.data.message);
-      getAllBooking();
-     }
-    }catch(error){
+    try {
+      const res = await axios.delete(
+        `http://localhost:3001/booking/deleteBooking/${SelectedBookings._id}`
+      );
+      if (res.data.success) {
+        toast.success(res.data.message);
+        getAllBooking();
+      }
+    } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.res.data.message);
     }
   };
-
-  // const handleStatusChange = (id, newStatus) => {
-  //   setData((prevData) =>
-  //     prevData.map((row) => (row.id === id ? { ...row, status: newStatus } : row))
-  //   );
-  // };
-  const handleStatusChange = (id, newStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, status: newStatus } : row
-      )
-    );
+  const handleView = (Booking) => {
+    setSelectedBookings(Booking);
+    setViewModalOpen(true);
   };
 
-  // const handleBStatusChange = (id, newBStatus) => {
-  //   setData((prevData) =>
-  //     prevData.map((row) => (row.id === id ? { ...row, Bstatus: newBStatus } : row))
-  //   );
-  // };
-  const handleBStatusChange = (id, newBStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, Bstatus: newBStatus } : row
-      )
-    );
+  const handleEdit = (Booking) => {
+    setSelectedBookings(Booking);
+    setEditFormData(Booking);
+    setEditModalOpen(true);
   };
 
-  //   const handleDelete = (row) => {
-  //     setData((prevData) => prevData.filter((row) => row.id !== row));
-  //  };
+  const handleDelete = (Booking) => {
+    setSelectedBookings(Booking);
+    setDeleteModalOpen(true);
+  };
+  const handleOpenAddModal = () => setAddModalOpen(true);
+  const handleCloseAddModal = () => {
+    console.log("hello");
+    setAddModalOpen(false);
+  };
 
-  //  const handleEdit = (row) => {
-  //   alert(`Edit function triggered for ID: ${row}`);
+  const handleCloseViewModal = () => setViewModalOpen(false);
+  const handleCloseEditModal = () => setEditModalOpen(false);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
+
+  const handleEditInputChange = (field) => (e) => {
+    setEditFormData({ ...editFormData, [field]: e.target.value });
+  };
+  const handleAddInputChange = (field) => (e) => {
+    setAddFormData({
+      ...addFormData,
+      [field]: e.target.value,
+    });
+  };
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to first page
+  };
+  // const fieldLabels = {
+  //   BookingTitle: "BookingTitle",
+  //   BookingType: "BookingType",
+  //   address: "Address",
+  //   price: "Price",
+  //   areaSqft: "Area Sqft",
+  //   furnishing: "furnishing",
+  //   status: "Status",
+
+  //   // Add all other fields you want to show with custom labels
   // };
 
-  //  const handleView = (row) => {
-  //  alert(`View function triggered for ID: ${row}`);
-  //  };
   const handleSearchChange = (e) => {
     console.log("target", e.target);
 
@@ -298,472 +207,813 @@ const TableWithDropdown = () => {
     setSearchTerm(value);
 
     if (value === "") {
-      setBookings(apiBooking); // Reset to full list when search is empty
+      setBookings(apiBookings); // Reset to full list when search is empty
       return;
     }
 
-    const filtered = apiBooking.filter((booking) => {
+    const filtered = apiBookings.filter((booking) => {
       return (
-        booking.name.toLowerCase().includes(value) || // bookingTitle = gfdgf.includes(gfdgf)
+        booking.name.toLowerCase().includes(value) || // propertyTitle = gfdgf.includes(gfdgf)
         booking.address.toLowerCase().includes(value) ||
         booking.email.toLowerCase().includes(value) ||
-        booking.phone.toString().toLowerCase().includes(value)||
-        booking.checkOut.toLowerCase().includes(value)||
-        booking. checkIN.toLowerCase().includes(value)
+        booking.mobileNo.toString().toLowerCase().includes(value)
       );
     });
 
     setBookings(filtered);
   };
+
+  // const handlestatusChange = (id, newstatus) => {
+  //   setData((prevData) =>
+  //     prevData.map((row) => (row.id === id ? { ...row, status: newstatus } : row))
+  //   );
+  // };
+  //   const dropdownFields = ["status", "Furnishing", "BookingType"]; // edit model mein drop down ke liye ye easy pdega
+
+  // const dropdownOptions = {
+  //   status: ["Available", "Sold", "Rented","Pending"],
+  //   Furnishing: ["Furnished", "Semi-Furnished", "Unfurnished"],
+  //   BookingType: ["Apartment", "House", "Commercial","Land","Villa","Office"],
+  // };
   return (
     <>
-      <div className="flex">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end", // always right align
+          flexWrap: "wrap", // wrap on small screens
+          gap: 2,
+          mt: 1,
+          mb: 4,
+          px: 2, // padding for small screens
+        }}
+      >
         <TextField
-          //   className='search'
-
           label="Search"
           variant="outlined"
-          // fullWidth
           value={searchTerm}
+          size="small"
           onChange={handleSearchChange}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon  sx={{color:"blue"}}/>
+                <SearchIcon />
               </InputAdornment>
             ),
           }}
-          style={{
-            marginBottom: "20px",
-            width: "160px",
-            display: "flex",
-            marginRight: "200px",
-            justifyContent: "flex-end",
-            marginLeft: "650px",
+          sx={{
+            maxWidth: "160px",
+            width: "100%",
           }}
         />
 
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          // color="primary"
-          onClick={handleAddNew}
-
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            display: "flex",
-            textWrap: "nowrap",
-            marginRight: "50px",
-            padding: "10px 10px 10px 10px",
-            borderRadius: "5px",
-            height: "50px",
-            width: "130px",
+          className="button"
+          onClick={handleOpenAddModal}
+          sx={{
+            // height: '50px',
+            maxWidth: "160px",
+            width: "100%",
+            backgroundColor: "rgb(4, 4,40)",
+            color: "#ffffff",
+            textTransform: "capitalize",
+            whiteSpace: "nowrap",
           }}
         >
           Add Booking
         </Button>
-      </div>
-      <TableContainer
-        component={Paper}
-        style={{ overflowX: "auto", maxWidth: 1070 }}
-      >
-        <Table className="w-full border border-gray-300">
-          <TableHead
-            sx={{
-              position: "sticky",
-              background: "white",
-              zIndex: 2,
-              top: "0",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <TableRow className="bg-gray-200">
-              {[
-                "S.No" ,
-                "Name",
-                "email",
-                "Phone No.",
-                "Address",
-                "Check-IN Date",
-                "Check-Out Date",
-                "Payment Status",
-                "Booking Status",
-                "Action",
-              ].map((header) => (
+      </Box>
+
+      <div className="table">
+        <TableContainer
+          component={Paper}
+          style={{
+            marginTop: "0px",
+            maxHeight: "400px",
+            overflow: "auto",
+            maxWidth: 1350,
+            whiteSpace: "nowrap",
+            scrollbarWidth: "none",
+          }}
+        >
+          <Table className="w-full border border-gray-300 ">
+            <TableHead
+              sx={{
+                background: "white",
+                position: "sticky",
+                fontWeight: "bold",
+                top: 0,
+                zIndex: 2,
+              }}
+            >
+              {/* top:0 ka mtlb h ki table ke head ko upr rakhega and z index mtlb table container ke upr rakhega  */}
+              <TableRow className="bg-gray-200" border="1px solid black">
                 <TableCell
-                  key={header}
-                  className="border p-2"
-                  sx={{ fontWeight: "bold", flex: "1", whiteSpace: "nowrap",paddingLeft:"20px" }}
-                >
-                  {header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {bookings.map((booking,index) => (
-              <TableRow
-                key={booking._id}
-                className="text-center"
-                sx={{ fonrweight: " bold", whiteSpace: "nowrap" ,}}
-              >
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" ,padding:"20px"}}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {index + 1}
+                  S.No
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.name}
+                  Name
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.email}
+                  Email
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.phone}
+                  Mobile
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.address}
+                  Address{" "}
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.checkIN}
+                  CheckIN
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  {booking.checkOut}
+                  CheckOut
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                
-                    {booking.status}
-                    
+                  Total Amount
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                 
-                    {booking.Bstatus}
-                    
+                  Payment Status
                 </TableCell>
                 <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
                 >
-                  <TableContainer
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <IconButton
-                      sx={{ color: "blue" }}
-                      onClick={() => handleView(booking)}
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "green" }}
-                      onClick={() => handleEdit(booking)}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "red" }}
-                      onClick={() => handleDelete(booking)}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableContainer>
+                  Booking Status
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Action
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {Bookings.length > 0 &&
+                Bookings.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                ).map((Booking, index) => (
+                  <TableRow
+                    key={Booking.id}
+                    className="text-center"
+                    sx={{
+                      fontWeight: "bold",
+                      transition: "all 0.3s ease",
+                      "&:hover": { backgroundColor: "rgba(12, 12, 101, 0.05)" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontSize: "12px",
+                        textAlign: "center",
+                        padding: "4px",
+                      }}
+                      className="border p-2"
+                    >
+                      {index + 1}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.name}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.email}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.mobileNo}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.address}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.check_in_date}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.check_out_date}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.TotalAmountUnit}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.paymentStatus}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Booking.Bookingstatus}
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: "bolder" }}
+                      className="border p-2"
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "5px",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <IconButton
+                          sx={{ color: "blue" }}
+                          className="view"
+                          onClick={() => handleView(Booking)}
+                        >
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "grey" }}
+                          className="edit"
+                          onClick={() => handleEdit(Booking)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "red" }}
+                          className="delete"
+                          onClick={() => handleDelete(Booking)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
         {/* View Modal */}
         <Modal open={viewModalOpen} onClose={handleCloseViewModal}>
           <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">BOOKING Details</Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography sx={{ fontWeight: "bold" }} variant="h6">
+                BookingDetails
+              </Typography>
               <IconButton onClick={handleCloseViewModal}>
                 <CloseIcon />
               </IconButton>
             </Box>
-            {selectedbooking && (
-              <Grid container spacing={2}>
-                {Object.entries(selectedbooking)
-                .filter(([field]) => field !== "_id" && field !== "__v" && field !== "createdAt"&& field !=="updatedAt").map(([key, value]) => (
-                  <Grid item xs={12} sm={6} key={key}>
-                    <Typography variant="subtitle1">
-                      <strong>{key}:</strong> {value}
-                    </Typography>
-                  </Grid>
-                ))}
+            {SelectedBookings && (
+              <Grid container spacing={2} mt={2}>
+                {Object.entries(SelectedBookings)
+                  .filter(
+                    ([key]) =>
+                      key !== "__v" &&
+                      key !== "_id" &&
+                      key !== "updatedAt" &&
+                      key !== "createdAt"
+                  )
+                  .map(([key, value]) => (
+                    <Grid item xs={6} key={key}>
+                      <Typography>
+                        <strong>{key}:</strong> {value}
+                      </Typography>
+                    </Grid>
+                  ))}
               </Grid>
             )}
           </Box>
         </Modal>
+
         {/* Edit Modal */}
         <Modal open={editModalOpen} onClose={handleCloseEditModal}>
           <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
+            <Box display="flex" justifyContent="space-between">
               <Typography variant="h6">Edit Booking</Typography>
               <IconButton onClick={handleCloseEditModal}>
                 <CloseIcon />
               </IconButton>
             </Box>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} mt={2}>
               {Object.keys(editFormData)
-              .filter((field) =>  field !== "_id" && field !== "createdAt" && field !== "updatedAt" && field !== "__v")
-              .map(
-                (field) =>
-                  field !== "id" && (
-                    <Grid item xs={12} sm={6} key={field}>
-                      {field==="status"? (
-                       <FormControl fullWidth>
-                        <InputLabel>
-                        Payment Status
-                        </InputLabel>
+                .filter(
+                  (field) =>
+                    field !== "__v" &&
+                    field !== "_id" &&
+                    field !== "updatedAt" &&
+                    field !== "createdAt"
+                )
+                .map((field) => (
+                  <Grid item xs={6} key={field}>
+                    {field === "PaymentStatus" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Payment Status</InputLabel>
                         <Select
-                        variant="standard"
-                        value={editFormData[field]|| ""}
-                        onChange={handleEditInputChange(field)}
+                          value={editFormData[field] || ""}
+                          onChange={handleEditInputChange(field)}
+                          label="PaymentStatus"
                         >
-                          <MenuItem value="pending">Pending</MenuItem>
-                          <MenuItem value="paid">Paid</MenuItem>
-                          <MenuItem value="overview">Overview</MenuItem>
+                          <MenuItem value="Active">Active</MenuItem>
+                          <MenuItem value="Pending">Pending</MenuItem>
+                          <MenuItem value="Failed">Failed</MenuItem>
                         </Select>
-                       </FormControl>
-                      ): field==="Bstatus"?(
-                        <FormControl fullWidth>
-                        <InputLabel>
-                        Booking Status
-                        </InputLabel>
+                      </FormControl>
+                    ) : field === "Bookingstatus" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Booking Status</InputLabel>
                         <Select
-                        variant="standard"
-                        value={editFormData[field]|| ""}
-                        onChange={handleEditInputChange(field)}
+                          value={editFormData[field] || ""}
+                          onChange={handleEditInputChange(field)}
+                          label="BookingStatus"
                         >
-                          <MenuItem value="confirmed">Confirmed</MenuItem>
-                          <MenuItem value="canceled">Canceled</MenuItem>
-                          <MenuItem value="complete">Complete</MenuItem>
+                          <MenuItem value="Pending">Pending</MenuItem>
+                          <MenuItem value="Confirmed">Confirmed</MenuItem>
+                          <MenuItem value="Cancelled">Cancelled</MenuItem>
                         </Select>
-                        </FormControl>
-                      ):(
+                      </FormControl>
+                    ) : field === "check_out_date" ? (
                       <TextField
                         fullWidth
-                        label={field}
+                        name="CheckOut"
+                        type="Date"
                         value={editFormData[field] || ""}
-                        onChange={handleEditInputChange(field)}
+                        onChange={(e) => handleEditInputChange(field)(e)}
+                        required
                       />
-                   ) }
-                    </Grid>
-                  )
-              )}
+                    ) : field === "check_in_date" ? (
+                      <TextField
+                        fullWidth
+                        name="CheckIN"
+                        type="Date"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => handleEditInputChange(field)(e)}
+                        required
+                      />
+                    ) : field === "name" ? (
+                      <TextField
+                        label="Name"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only alphabets and spaces (optional)
+                          if (/^[a-zA-Z\s]*$/.test(value)) {
+                            handleEditInputChange("name")(e);
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    ) : field === "email" ? (
+                      <TextField
+                        label="E-mail"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleEditInputChange("email")(e);
+
+                          // Optional: validate separately if needed
+                          if (
+                            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+                              value
+                            )
+                          ) {
+                            console.log("Valid email");
+                            handleEditInputChange("email")(e);
+                          } else {
+                            console.log("Invalid email");
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    ) : field === "mobileNo" ? (
+                      <TextField
+                        label="Phone"
+                        type="tel"
+                        inputProps={{ maxLength: 10, pattern: "[0-9]{10}" }}
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d{0,10}$/.test(value)) {
+                            handleEditInputChange(field)(e);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value.length !== 10) {
+                            alert("Phone number must be exactly 10 digits");
+                            // Optionally reset or mark as error
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        required
+                      />
+                    ) : field === "address" ? (
+                      <TextField
+                        label="address"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          let value = e.target.value;
+
+                          if (field === "address") {
+                            // Allow blank or values starting with A-Za-z1-9
+                            if (value === "" || /^[A-Za-z1-9]/.test(value)) {
+                              // Auto-capitalize first letter
+
+                              value =
+                                value.charAt(0).toUpperCase() + value.slice(1);
+                            } else {
+                              return;
+                            }
+                          }
+                          // Use updated value
+                          handleEditInputChange(field)({
+                            ...e,
+                            target: { ...e.target, value },
+                          });
+                        }}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    ) : field === "TotalAmountUnit" ? (
+                      <TextField
+                        label="Total Amount"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleEditInputChange(field)(e);
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        required
+                      />
+                    ) : null}
+                  </Grid>
+                ))}
             </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 2,
-                mt: 3,
-              }}
-            >
-              <Button variant="outlined" onClick={handleCloseEditModal}>
+            <Box display="flex" justifyContent="flex-end" mt={3}>
+              <Button
+                variant="standard"
+                className="cancle"
+                onClick={handleCloseEditModal}
+                sx={{ backgroundColor: "grey", color: "white" }}
+              >
                 Cancel
               </Button>
-              <Button variant="contained" onClick={handleUpdate}>
+              <Button
+                variant="contained"
+                className="update"
+                onClick={handleUpdate}
+                sx={{ ml: 2, backgroundColor: "rgb(4, 4,40)" }}
+              >
                 Update
               </Button>
             </Box>
           </Box>
         </Modal>
+
         {/* Delete Modal */}
         <Modal open={deleteModalOpen} onClose={handleCloseDeleteModal}>
           <Box sx={deleteModalStyle}>
-            <Typography variant="h6" gutterBottom>
-              Confirm Delete
+            <Typography variant="h6">Confirm Delete</Typography>
+            <Typography my={2}>
+              Are you sure you want to delete this Booking?
             </Typography>
-            <Typography sx={{ mb: 3 }}>
-              Are you sure you want to delete this booking?
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button variant="outlined" onClick={handleCloseDeleteModal}>
-                Cancel
+            <Box display="flex" justifyContent="flex-end" gap={2}>
+              <Button
+                variant="standard"
+                onClick={handleCloseDeleteModal}
+                className="cancle"
+                sx={{ color: "white", backgroundColor: "grey" }}
+              >
+                CANCLE
               </Button>
               <Button
                 variant="contained"
                 color="error"
                 onClick={handleConfirmDelete}
+                className="delete1"
+                sx={{backgroundColor:"red"}}
               >
-                Delete
+                DELETE
               </Button>
             </Box>
           </Box>
-        </Modal>   
-        {/* add booking model */}
-            <Modal open={addModalOpen} onClose={handleCloseAddModal}>
-        <Box sx={modalStyle}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" fontWeight="bold">Add New Booking</Typography>
-            <IconButton onClick={handleCloseAddModal}>
-              <CloseIcon />
-            </IconButton>
+        </Modal>
+
+        {/* Add BookingModal  */}
+        <Modal open={addModalOpen} onClose={handleCloseAddModal}>
+          <Box sx={modalStyle}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                Add New Booking
+              </Typography>
+              <IconButton onClick={handleCloseAddModal}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="name"
+                  name="name"
+                  value={addFormData.name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only alphabets and spaces (optional)
+                    if (/^[a-zA-Z\s]*$/.test(value)) {
+                      handleAddInputChange("name")(e);
+                    }
+                  }}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="E-mail"
+                  name="email"
+                  value={addFormData.email}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Always update input value
+                    handleAddInputChange("email")(e);
+
+                    // Optional: validate separately if needed
+                    if (
+                      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+                        value
+                      )
+                    ) {
+                      console.log("Valid email");
+                      handleAddInputChange("email")(e);
+                    } else {
+                      console.log("Invalid email");
+                    }
+                  }}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Mobile No"
+                  name="mobileNo"
+                  type="Number"
+                  value={addFormData.mobileNo}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d{0,10}$/.test(value)) {
+                      handleAddInputChange("mobileNo")(e);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value.length !== 10) {
+                      alert("Phone number must be exactly 10 digits");
+                      // Optionally reset or mark as error
+                    }
+                  }}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="address"
+                  name="address"
+                  value={addFormData.address}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Allow blank or values starting with A-Za-z1-9
+                    if (value === "" || /^[a-zA-Z0-9]*$/.test(value)) {
+                      // Auto-capitalize first letter
+
+                      value = value.charAt(0).toUpperCase() + value.slice(1);
+                    } else {
+                      return;
+                    }
+
+                    // Use updated value
+                    handleAddInputChange("address")({
+                      ...e,
+                      target: { ...e.target, value },
+                    });
+                  }}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="check_in_date"
+                  type="Date"
+                  name="check_in_date"
+                  // type="number"
+                  value={addFormData.check_in_date}
+                  onChange={handleAddInputChange("check_in_date")}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="check_out_date"
+                  name="check_out_date"
+                  type="Date"
+                  // type="number"
+                  value={addFormData.check_out_date}
+                  onChange={handleAddInputChange("check_out_date")}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Total Amount"
+                  name="TotalAmountUnit"
+                  type="number"
+                  value={addFormData.TotalAmountUnit}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleAddInputChange("TotalAmountUnit")(e);
+                    }
+                  }}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Payment Status</InputLabel>
+                  <Select
+                    label="Payment Status"
+                    name="PaymentStatus"
+                    value={addFormData.PaymentStatus}
+                    onChange={handleAddInputChange("PaymentStatus")}
+                    required
+                  >
+                     <MenuItem value="Active">Active</MenuItem>
+                              <MenuItem value="Pending">Pending</MenuItem>
+                              <MenuItem value="Failed">Failed</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Booking Status</InputLabel>
+                  <Select
+                    label="Booking status"
+                    name="Bookingstatus"
+                    value={addFormData.Bookingstatus}
+                    onChange={handleAddInputChange("Bookingstatus")}
+                    required
+                  >
+                    <MenuItem value="Pending">Pending</MenuItem>
+                    <MenuItem value="Confirmed">Confirmed</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="flex-end" gap={2}>
+                  <Button
+                    variant="standard"
+                    onClick={handleCloseAddModal}
+                    className="cancle"
+                    sx={{ color: "white", backgroundColor: "grey" }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleAddBooking}
+                    className="save"
+                    sx={{ color: "white", backgroundColor: "rgb(4,4,44)" }}
+                  >
+                    Save Booking
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
-          <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={addFormData.name}
-                onChange={handleAddInputChange('name')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="email"
-                name="email"
-                value={addFormData.email}
-                onChange={handleAddInputChange('email')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={addFormData.phone}
-                onChange={handleAddInputChange('phone')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Address"
-                name="address"
-                value={addFormData.address}
-                onChange={handleAddInputChange('address')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="CheckIn"
-                name="CheckIn"
-                value={addFormData.checkIN}
-                onChange={handleAddInputChange('checkIN')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="CheckOut"
-                name="CheckOut"
-                value={addFormData.checkOut}
-                onChange={handleAddInputChange('checkOut')}
-                required
-              />
-            </Grid>
-          
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="status-label">Status</InputLabel>
-                <Select
-                  labelId="status-label"
-                  name="status"
-                  value={addFormData.status}
-                  onChange={handleAddInputChange('status')}
-                  required
-                > 
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="paid">Paid</MenuItem>
-                      <MenuItem value="overDue">OverDue</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="Bstatus-label"> Booking Status</InputLabel>
-                <Select
-                  labelId="Bstatus-label"
-                  name="Bstatus"
-                  value={addFormData.Bstatus}
-                  onChange={handleAddInputChange('Bstatus')}
-                  required
-                > 
-               <MenuItem value="confirmed">Confirmed</MenuItem>
-                          <MenuItem value="canceled">Canceled</MenuItem>
-                          <MenuItem value="complete">Complete</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="flex-end" gap={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleCloseAddModal}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  onClick={handleAddBooking}
-                >
-                  Save Booking
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Modal>
-      </TableContainer>
+        </Modal>
+      </div>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        sx={{mt:-3}}
+        count={Bookings.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </>
   );
 };
 
-export default TableWithDropdown;
+export default BookingTable;

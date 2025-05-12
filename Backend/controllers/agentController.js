@@ -6,6 +6,12 @@ export const createAgent = async (req, res) => {//controller hai
         const { name, email, phone, address, license, Experience, Rate, status } = req.body;
         if(!name || !email || !phone|| !address || !license|| !Experience || !Rate|| !status) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
+        } 
+        if (!/^\d{10}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits .',
+            });
         }
 
         await Agent.create({name, email, phone, address, license, Experience, Rate, status})
@@ -46,11 +52,18 @@ export const updateAgent = async (req, res) => {
         const { name,email,phone, address, license , Experience, Rate,status} = req.body;
         const agentId = req.params.id; 
 
+      
+
         const existingAgent = await Agent.findById(agentId);
         if (!existingAgent) {
             return res.status(404).json({ message: 'agent not found' });
         }
-
+        if (!/^\d{10}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits .',
+            });
+        }
         const updateData = {
             name,email,phone, address, license , Experience, Rate,status
         };

@@ -7,7 +7,12 @@ export const createSeller = async (req, res) => {//controller hai
         if(!name || !email || !phone|| !address  || !Id ||! ListedPrice|| !status) {
             return res.status(400).json({ success: false, message: 'All fields are required!' });
         }
-
+        if (!/^\d{10}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits ',
+            });
+        }
         await Seller.create({name, email, phone, address , Id , ListedPrice , status})
         res.status(201).json({
             success:true,

@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+  InputLabel,
+  FormControl,
+  InputAdornment,
   Table,
+  Select,
+  MenuItem,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
-  Paper,
-  Select,
-  TableContainer,
-  MenuItem,
   IconButton,
   Modal,
   Box,
@@ -16,8 +17,8 @@ import {
   Grid,
   TextField,
   Button,
-  FormControl,
-  InputLabel,
+  TableContainer,
+  Paper,
 } from "@mui/material";
 import {
   Visibility,
@@ -25,47 +26,14 @@ import {
   Delete,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import axios from "axios";
-import { InputAdornment } from "@mui/material";
-
 import SearchIcon from "@mui/icons-material/Search";
+import TablePagination from "@mui/material/TablePagination";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "axios";
 import { toast } from "react-toastify";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const TableWithDropdown = () => {
-  const [data, setData] = useState([
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      amount: "500000",
-      transactionType: "Income",
-      catogery: "Salary",
-      PaymentMode: "cash",
-      TransactionDate: "21st march",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Neha Verma",
-      amount: "800000",
-      transactionType: "Expence",
-      catogery: "Payment Rent",
-      PaymentMode: "UPI",
-      TransactionDate: "1st feb",
-      status: "Completed",
-    },
-    {
-      id: 3,
-      name: "Amit Kumar",
-      amount: "45000",
-      transactionType: "Expence",
-      catogery: "Utilities",
-      PaymentMode: "Credit Card",
-      TransactionDate: "6th jan",
-      status: "Cancled",
-    },
-  ]);
   const modalStyle = {
     position: "absolute",
     top: "50%",
@@ -77,141 +45,86 @@ const TableWithDropdown = () => {
     boxShadow: 24,
     p: 4,
     borderRadius: 1,
-    maxHeight: "70vh",
+    maxHeight: "90vh",
     overflow: "auto",
   };
 
   const deleteModalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    ...modalStyle,
     width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    borderRadius: 1,
-    textAlign: "center",
+    // textAlign: 'center'
   };
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedfinance, setSelectedfinance] = useState(null);
+  const [selectedFinance, setSelectedFinance] = useState(null);
   const [editFormData, setEditFormData] = useState({});
-  const [finances, setFinances] = useState([]);
+  const [Finances, setFinances] = useState([]);
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    amount: "",
+    transactionType: "",
+    catogery: "",
+    PaymentMode: "",
+    TransactionDate: "",
+    status: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [apiFinances, setApiFinances] = useState([]);
-  const [addFormData,setAddFormData] =useState({
-    name: '',
-    amount: '',
-    transactionType: '',
-    catogery: '',
-    PaymentMode: '',
-    TransactionDate:'',
-    status:'Pending',
-    })
-    const [addModalOpen,setAddModalOpen]=useState(false);
-  
-    const navigate =useNavigate();
 
+  const navigate = useNavigate();
+  const handleAddFinance = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:3001/finance/createFinance,addFormData`
+      );
+      if (res.data.success) {
+        toast.success("Finance added successfully!");
+        handleCloseAddModal();
+        getAllFinance();
+        //reset form data
+        setAddFormData({
+          name: "",
+          amount: "",
+          transactionType: "",
+          catogery: "",
+          PaymentMode: "",
+          TransactionDate: "",
+          status: "",
+        });
+      }
+    } catch (error) {
+      console.error("error adding Finance", error);
+      toast.error(error.res?.data?.message || "failed to add Finance");
+    }
+  };
   const getAllFinance = async () => {
     try {
       const res = await axios.get(
         `http://localhost:3001/finance/getAllFinance`
       );
-      console.log("response", res.data);
+      console.log(res.data);
       setFinances(res.data);
       setApiFinances(res.data);
     } catch (error) {
-      console.log(error);
+      console.log("error");
     }
   };
   useEffect(() => {
     getAllFinance();
   }, []);
-
-  // const getAllProperty = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       `http://localhost:3001/property/getAllProperty`
-  //     );
-  //     console.log("response", res.data);
-  //     setProperties(res.data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getAllProperty();
-  // }, []);
-  const handleView = (finance) => {
-    setSelectedfinance(finance);
-    setViewModalOpen(true);
-  };
-
-  const handleEdit = (finance) => {
-    setSelectedfinance(finance);
-    setEditFormData(finance);
-    setEditModalOpen(true);
-  };
-
-  const handleDelete = (finance) => {
-    setSelectedfinance(finance);
-    setDeleteModalOpen(true);
-  };
-  const handleAddNew=()=>{
-    setAddModalOpen(true);
-  }
-  const handleCloseViewModal = () => setViewModalOpen(false);
-  const handleCloseEditModal = () => setEditModalOpen(false);
-  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
-  const handleCloseAddModal =()=> setAddModalOpen(false);
-
-  const handleAddInputChange =(field) => (event) =>{
-    setAddFormData({
-      ...addFormData,
-      [field]:event.target.value,
-    });
-  };
-  const handleAddFinance = async () => {
-    try {
-      const response = await axios.post('http://localhost:3001/finance/createFinance', addFormData);
-      if (response.data.success) {
-        toast.success('finance added successfully!');
-        handleCloseAddModal();
-        getAllFinance();
-        // Reset form data
-        setAddFormData({
-          name: '',
-          amount: '',
-          transactionType: '',
-          catogery: '',
-          PaymentMode: '',
-          TransactionDate:'',
-          status:'Pending',
-         
-        });
-      }
-    } catch (error) {
-      console.error('Error adding finance:', error);
-      toast.error(error.response?.data?.message || 'Failed to add finance');
-    }
-  };
-
-  const handleEditInputChange = (field) => (event) => {
-    setEditFormData({
-      ...editFormData,
-      [field]: event.target.value,
-    });
-  };
   const handleUpdate = async () => {
     handleCloseEditModal();
-    // console.log("selected property ", selectedProperty);
-    
+    // console.log("selected Finance ", selectedFinance);
+
     try {
       const res = await axios.put(
-       ` http://localhost:3001/finance/updateFinance/${selectedfinance._id}`, editFormData
+        `http://localhost:3001/finance/updateFinance/${selectedFinance._id}`,
+        editFormData
       );
       if (res.data.success) {
         toast.success(res.data.message);
@@ -224,62 +137,64 @@ const TableWithDropdown = () => {
     }
   };
 
-
-  const handleConfirmDelete = async() => {
-   
-    // Here you would typically make an API call to delete the property
+  const handleConfirmDelete = async () => {
     handleCloseDeleteModal();
-    try{
-       const res=await axios.delete(`http://localhost:3001/finance/deleteFinance/${selectedfinance._id}`);
-       if(res.data.success){
+    try {
+      const res = await axios.delete(
+        `http://localhost:3001/finance/deleteFinance/${selectedFinance._id}`
+      );
+      if (res.data.success) {
         toast.success(res.data.message);
         getAllFinance();
-       }
-    }catch(error){
-        console.log(error);
-        toast.error(error.response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.res.data.message);
     }
   };
-  const handleStatusChange = (id, newStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, status: newStatus } : row
-      )
-    );
-  };
-  const handleLStatusChange = (id, newLStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, Lstatus: newLStatus } : row
-      )
-    );
-  };
-  const handlePStatusChange = (id, newPStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, Pstatus: newPStatus } : row
-      )
-    );
-  };
-  const handleKStatusChange = (id, newKStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, Kstatus: newKStatus } : row
-      )
-    );
+  const handleView = (Finance) => {
+    setSelectedFinance(Finance);
+    setViewModalOpen(true);
   };
 
-  // const handleDelete = (id) => {
-  //   setData((prevData) => prevData.filter((row) => row.id !== id));
-  // };
+  const handleEdit = (Finance) => {
+    setSelectedFinance(Finance);
+    setEditFormData(Finance);
+    setEditModalOpen(true);
+  };
 
-  // const handleEdit = (id) => {
-  //   alert(`Edit function triggered for ID: ${id}`);
-  // };
+  const handleDelete = (Finance) => {
+    setSelectedFinance(Finance);
+    setDeleteModalOpen(true);
+  };
+  const handleOpenAddModal = () => setAddModalOpen(true);
+  const handleCloseAddModal = () => {
+    console.log("hello");
+    setAddModalOpen(false);
+  };
 
-  // const handleView = (id) => {
-  //   alert(`View function triggered for ID: ${id}`);
-  // };
+  const handleCloseViewModal = () => setViewModalOpen(false);
+  const handleCloseEditModal = () => setEditModalOpen(false);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
+
+  const handleEditInputChange = (field) => (e) => {
+    setEditFormData({ ...editFormData, [field]: e.target.value });
+  };
+  const handleAddInputChange = (field) => (e) => {
+    setAddFormData({
+      ...addFormData,
+      [field]: e.target.value,
+    });
+  };
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to first page
+  };
+
   const handleSearchChange = (e) => {
     console.log("target", e.target);
 
@@ -287,230 +202,299 @@ const TableWithDropdown = () => {
     setSearchTerm(value);
 
     if (value === "") {
-      setFinances(finances); // Reset to full list when search is empty
+      setFinances(apiFinances); // Reset to full list when search is empty
       return;
     }
 
-    const filtered = apiFinances.filter((finance) => {
+    const filtered = apiFinances.filter((Finance) => {
       return (
-        finance.name.toLowerCase().includes(value) || // propertyTitle = gfdgf.includes(gfdgf)
-        finance.TransactionDate.toLowerCase().includes(value) ||
-        finance.amount.toString().toLowerCase().includes(value)
+        Finance.name.toLowerCase().includes(value) || // Name = gfdgf.includes(gfdgf)
+        Finance.amount.toLowerCase().includes(value) ||
+        Finance.TransactionDate.toString().toLowerCase().includes(value)
       );
     });
 
     setFinances(filtered);
   };
+
+  // const handlestatusChange = (id, newstatus) => {
+  //   setData((prevData) =>
+  //     prevData.map((row) => (row.id === id ? { ...row, status: newstatus } : row))
+  //   );
+  // };
+  //   const dropdownFields = ["status", "Furnishing", "FinanceType"]; // edit model mein drop down ke liye ye easy pdega
+
+  // const dropdownOptions = {
+  //   status: ["Available", "Sold", "Rented","Pending"],
+  //   Furnishing: ["Furnished", "Semi-Furnished", "Unfurnished"],
+  //   FinanceType: ["Apartment", "House", "Commercial","Land","Villa","Office"],
+  // };
   return (
     <>
-      <div className="flex">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end", // always right align
+          flexWrap: "wrap", // wrap on small screens
+          gap: 2,
+          mt: 1,
+          mb: 4,
+          px: 2, // padding for small screens
+        }}
+      >
         <TextField
-          //   className='search'
-
           label="Search"
           variant="outlined"
-          // fullWidth
           value={searchTerm}
+          size="small"
           onChange={handleSearchChange}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{color:"blue"}} />
+                <SearchIcon />
               </InputAdornment>
             ),
           }}
-          style={{
-            marginBottom: "20px",
-            width: "160px",
-            display: "flex",
-            marginRight: "200px",
-            justifyContent: "flex-end",
-            marginLeft: "650px",
+          sx={{
+            maxWidth: "160px",
+            width: "100%",
           }}
         />
 
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          // color="primary"
-          //onClick={handleAddNew}
-
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            display: "flex",
-            textWrap: "nowrap",
-            marginRight: "50px",
-            padding: "10px 10px 10px 10px",
-            borderRadius: "5px",
-            height: "50px",
-            width: "130px",
+          className="button"
+          onClick={handleOpenAddModal}
+          sx={{
+            // height: '50px',
+            maxWidth: "160px",
+            width: "100%",
+            backgroundColor: "rgb(4, 4,40)",
+            color: "#ffffff",
+            textTransform: "capitalize",
+            whiteSpace: "nowrap",
           }}
         >
           Add Finance
         </Button>
-      </div>
-      <TableContainer
-        component={Paper}
-        style={{ overflowX: "auto", maxWidth: "1070px" }}
-      >
-        <Table className="w-full border border-gray-300">
-          <TableHead
-            sx={{
-              height: "20px",
-              position: "sticky",
-              background: "white",
-              zIndex: 2,
-              top: "0",
-              whiteSpace: "nowrap",
-              fontSize: "15px",
-            }}
-          >
-            <TableRow className="bg-gray-200">
-              {[
-                "S.No",
-                "Name",
-                "Amount",
-                "TransactionType",
-                "Category",
-                " Payment Mode",
-                "Transaction Date",
-                "Status",
-                "Action",
-              ].map((header) => (
-                <TableCell
-                  key={header}
-                  className="border p-2"
-                  sx={{ fontWeight: "bold", flex: "1", whiteSpace: "nowrap",paddingLeft:"20px" }}
-                >
-                  {header}
+      </Box>
+
+      <div className="table">
+        <TableContainer
+          component={Paper}
+          style={{
+            marginTop: "0px",
+            maxHeight: "400px",
+            overflow: "auto",
+            scrollbarWidth: "none",
+          }}
+        >
+          <Table className="w-full border border-gray-300 ">
+            <TableHead
+              sx={{
+                background: "white",
+                position: "sticky",
+                fontWeight: "bold",
+                top: 0,
+                zIndex: 2,
+                whiteSpace:"nowrap"
+              }}
+            >
+              {/* top:0 ka mtlb h ki table ke head ko upr rakhega and z index mtlb table container ke upr rakhega  */}
+              <TableRow className="bg-gray-200" border="1px solid black">
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  S.No
                 </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {finances.map((finance,index) => (
-              <TableRow
-                key={finance._id}
-                className="text-center "
-                sx={{ whiteSpace: "nowrap" }}
-              >
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center",paddingLeft:"20px" }}
-                  className="border p-2"
-                >
-                  {index + 1}
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Name
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                  {finance.name}
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Amount
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                  {finance.amount}
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Transaction Type
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                 
-                    {finance.transactionType}
-                   
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Catogery
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                 {finance.catogery}
-                    
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Payment Mode
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                 {finance.PaymentMode}
-                    
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Transaction Date
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                  {finance.TransactionDate}
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  status
                 </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                  {finance.status}
-                   
-                </TableCell>
-                <TableCell
-                  sx={{ padding: "4px", fontSize: "12px", textAlign: "center" }}
-                  className="border p-2"
-                >
-                  <TableContainer
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      justifyContent: "center",
-                      fontWeight: "12px",
-                    }}
-                  >
-                    <IconButton
-                      sx={{ color: "blue" }}
-                      onClick={() => handleView(finance)}
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "green" }}
-                      onClick={() => handleEdit(finance)}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "red" }}
-                      onClick={() => handleDelete(finance)}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableContainer>
+                <TableCell sx={{ fontWeight: "bold" }} className="border p-2">
+                  Action
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {Finances.length > 0 &&
+                Finances.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                ).map((Finance, index) => (
+                  <TableRow
+                    key={Finance.id}
+                    className="text-center"
+                    sx={{
+                      fontWeight: "bold",
+                      transition: "all 0.3s ease",
+                      "&:hover": { backgroundColor: "rgba(12, 12, 101, 0.05)" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontSize: "12px",
+                        textAlign: "center",
+                        padding: "16px",
+                      }}
+                      className="border p-2"
+                    >
+                      {index + 1}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                        whiteSpace:"nowrap"
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.name}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                        whiteSpace:"nowrap"
+    
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.amount}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.transactionType}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.catogery}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.PaymentMode}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.TransactionDate}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "16px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Finance.status}
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: "bolder" }}
+                      className="border p-2"
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "5px",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <IconButton
+                          sx={{ color: "blue" }}
+                          onClick={() => handleView(Finance)}
+                        >
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "grey" }}
+                          onClick={() => handleEdit(Finance)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "red" }}
+                          onClick={() => handleDelete(Finance)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
         {/* View Modal */}
         <Modal open={viewModalOpen} onClose={handleCloseViewModal}>
           <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">finance Details</Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography sx={{ fontWeight: "bold" }} variant="h6">
+                Finance Details
+              </Typography>
               <IconButton onClick={handleCloseViewModal}>
                 <CloseIcon />
               </IconButton>
             </Box>
-            {selectedfinance && (
-              <Grid container spacing={2}>
-                {Object.entries(selectedfinance)
-                .filter(([field]) => field !== "_id" && field !== "__v" && field !== "createdAt"&& field !=="updatedAt")    
-                .map(([key, value]) => (
-                  <Grid item xs={12} sm={6} key={key}>
-                    <Typography variant="subtitle1">
-                      <strong>{key}:</strong> {value}
-                    </Typography>
-                  </Grid>
-                ))}
+            {selectedFinance && (
+              <Grid container spacing={2} mt={2}>
+                {Object.entries(selectedFinance)
+                  .filter(
+                    ([key]) =>
+                      key !== "__v" &&
+                      key !== "_id" &&
+                      key !== "updatedAt" &&
+                      key !== "createdAt"
+                  )
+                  .map(([key, value]) => (
+                    <Grid item xs={6} key={key}>
+                      <Typography>
+                        <strong>{key}:</strong> {value}
+                      </Typography>
+                    </Grid>
+                  ))}
               </Grid>
             )}
           </Box>
@@ -519,111 +503,132 @@ const TableWithDropdown = () => {
         {/* Edit Modal */}
         <Modal open={editModalOpen} onClose={handleCloseEditModal}>
           <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">Edit finance</Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h6">Edit Finance</Typography>
               <IconButton onClick={handleCloseEditModal}>
                 <CloseIcon />
               </IconButton>
             </Box>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} mt={2}>
               {Object.keys(editFormData)
-              .filter((field) => field !== "_id" && field !== "createdAt" && field !== "updatedAt" && field !== "__v")
-              .map(
-                (field) =>
-                  field !== "id" && (
-                    <Grid item xs={12} sm={6} key={field}>
-                      { field==="transactionType"? (
-                        <FormControl fullWidth>
-                          <InputLabel>
-                          Transaction Type
-                          </InputLabel>
-                          <Select
-                          variant="standard"
-                          value={editFormData[field]|| ""}
+                .filter(
+                  (field) =>
+                    field !== "__v" &&
+                    field !== "_id" &&
+                    field !== "updatedAt" &&
+                    field !== "createdAt"
+                )
+                .map((field) => (
+                  <Grid item xs={6} key={field}>
+                    {field === "status" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          value={editFormData[field] || ""}
                           onChange={handleEditInputChange(field)}
-                          >
-                            <MenuItem value="Income">Income</MenuItem>
-                            <MenuItem value="Expence">Expence</MenuItem>
-                          </Select>
-                        </FormControl>
-                      ): field==="catogery"?(
-                        <FormControl fullWidth>
-                          <InputLabel>
-                          Catogery
-                          </InputLabel>
-                          <Select
-                          variant="standard"
-                          value={editFormData[field]|| ""}
+                          label="status"
+                        >
+                          <MenuItem value="Pending">Pending</MenuItem>
+                          <MenuItem value="Completed">Completed</MenuItem>
+                          <MenuItem value="Cancled">Cancled</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : field === "catogery" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Category</InputLabel>
+                        <Select
+                          value={editFormData[field] || ""}
                           onChange={handleEditInputChange(field)}
-                          >
-                            <MenuItem value="Salary">Salary</MenuItem>
-                            <MenuItem value="Payment Rent">Payment Rent</MenuItem>
-                            <MenuItem value="Utilities">Utilities</MenuItem>
-                          </Select>
-                        </FormControl>
-                      ): field==="PaymentMode"?(
-                        <FormControl fullWidth>
-                          <InputLabel>
-                          Payment Mode
-                          </InputLabel>
-                          <Select
-                          variant="standard"
-                          value={editFormData[field]|| ""}
+                          label="Category"
+                        >
+                          <MenuItem value="Salary">Salary</MenuItem>
+                          <MenuItem value="PaymentRent">Payment Rent</MenuItem>
+                          <MenuItem value="Utilities">Utilities</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : field === "PaymentMode" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Payment Mode</InputLabel>
+                        <Select
+                          value={editFormData[field] || ""}
                           onChange={handleEditInputChange(field)}
-                          >
-                     <MenuItem value="cash">cash</MenuItem>
-                    <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
-                    <MenuItem value="UPI">UPI</MenuItem>
-                    <MenuItem value="Credit Card">Credit Card</MenuItem>
-                    <MenuItem value=" Debit Card">Debit Card</MenuItem>
-                          </Select>
-                        </FormControl>
-                      ): field==="status"?(
-                        <FormControl fullWidth>
-                          <InputLabel>
-                          Status
-                          </InputLabel>
-                          <Select
-                          variant="standard"
-                          value={editFormData[field]|| ""}
+                          label="Payment Mode"
+                        >
+                          <MenuItem value="Cash">Cash</MenuItem>
+                          <MenuItem value="Bank">Bank Transfer</MenuItem>
+                          <MenuItem value="Upi">UPI</MenuItem>
+                          <MenuItem value="CreditCard">Credit Card</MenuItem>
+                          <MenuItem value="DebitCard">Debit Card</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : field === "transactionType" ? (
+                      <FormControl fullWidth>
+                        <InputLabel>Transaction Type</InputLabel>
+                        <Select
+                          value={editFormData[field] || ""}
                           onChange={handleEditInputChange(field)}
-                          >
-                            <MenuItem value="Pending">Pending</MenuItem>
-                    <MenuItem value="Completed">Completed </MenuItem>
-                    <MenuItem value="Cancled">Cancled</MenuItem>
-                          </Select>
-                        </FormControl>
-                      ):(
+                          label="Transaction Type"
+                        >
+                          <MenuItem value="Income">Income</MenuItem>
+                          <MenuItem value="Expense">Expense</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : field === "name" ? (
+                      <TextField
+                        label="Name"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only alphabets and spaces (optional)
+                          if (/^[a-zA-Z\s]*$/.test(value)) {
+                            handleEditInputChange("name")(e);
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    ) : field === "amount" ? (
+                      <TextField
+                        label="Total Amount"
+                        value={editFormData[field] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleEditInputChange(field)(e);
+                          }
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        required
+                      />
+                    ) : field === "TransactionDate" ? (
                       <TextField
                         fullWidth
-                        label={field}
+                        name="TransactionDate"
+                        type="Date"
                         value={editFormData[field] || ""}
-                        onChange={handleEditInputChange(field)}
+                        onChange={(e) => handleEditInputChange(field)(e)}
+                        required
                       />
-                      )}
-                    </Grid>
-                  )
-              )}
+                    ) : null}
+                  </Grid>
+                ))}
             </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 2,
-                mt: 3,
-              }}
-            >
-              <Button variant="outlined" onClick={handleCloseEditModal}>
+            <Box display="flex" justifyContent="flex-end" mt={3}>
+              <Button
+                variant="standard"
+                onClick={handleCloseEditModal}
+                className="cancle"
+                sx={{ backgroundColor: "grey", color: "white" }}
+              >
                 Cancel
               </Button>
-              <Button variant="contained" onClick={handleUpdate}>
+              <Button
+                variant="contained"
+                onClick={handleUpdate}
+                className="update"
+                sx={{ ml: 2, backgroundColor: "rgb(4, 4,40)" }}
+              >
                 Update
               </Button>
             </Box>
@@ -633,177 +638,193 @@ const TableWithDropdown = () => {
         {/* Delete Modal */}
         <Modal open={deleteModalOpen} onClose={handleCloseDeleteModal}>
           <Box sx={deleteModalStyle}>
-            <Typography variant="h6" gutterBottom>
-              Confirm Delete
+            <Typography variant="h6">Confirm Delete</Typography>
+            <Typography my={2}>
+              Are you sure you want to delete this Finance?
             </Typography>
-            <Typography sx={{ mb: 3 }}>
-              Are you sure you want to delete this finance?
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button variant="outlined" onClick={handleCloseDeleteModal}>
-                Cancel
+            <Box display="flex" justifyContent="flex-end" gap={2}>
+              <Button
+                variant="standard"
+                onClick={handleCloseDeleteModal}
+                className="cancle"
+                sx={{ color: "white", backgroundColor: "grey" }}
+              >
+                CANCLE
               </Button>
               <Button
                 variant="contained"
+                className="delete1"
                 color="error"
+                 sx={{backgroundColor:"red"}}
                 onClick={handleConfirmDelete}
               >
-                Delete
+                DELETE
               </Button>
             </Box>
           </Box>
         </Modal>
-           {/* add Finance model */}
-           <Modal open={addModalOpen} onClose={handleCloseAddModal}>
-        <Box sx={modalStyle}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" fontWeight="bold">Add New Finance</Typography>
-            <IconButton onClick={handleCloseAddModal}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={addFormData.name}
-                onChange={handleAddInputChange('name')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="amount"
-                name="amonut"
-                value={addFormData.amount}
-                onChange={handleAddInputChange('amount')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="TransactionType-label"> Transaction Type</InputLabel>
-                <Select
-                  labelId="TransactionType-label"
-                  name="TransactionType"
-                  value={addFormData.transactionType}
-                  onChange={handleAddInputChange('transactionType')}
-                  required
-                > 
-              <MenuItem value="Income">Income</MenuItem>
-              <MenuItem value="Expence">Expence</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="catogery-label"> catogery</InputLabel>
-                <Select
-                  labelId="catogery-label"
-                  name="catogery"
-                  value={addFormData.catogery}
-                  onChange={handleAddInputChange('catogery')}
-                  required
-                > 
-               <MenuItem value="Salary">Salary</MenuItem>
-                    <MenuItem value="Payment Rent">Payment Rent</MenuItem>
-                    <MenuItem value="Utilities">Utilities</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="PaymentMode-label"> Payment Mode</InputLabel>
-                <Select
-                  labelId="PaymentMode-label"
-                  name="PaymentMode"
-                  value={addFormData.PaymentMode}
-                  onChange={handleAddInputChange('PaymentMode')}
-                  required
-                > 
-                                  <MenuItem value="cash">cash</MenuItem>
-                    <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
-                    <MenuItem value="UPI">UPI</MenuItem>
-                    <MenuItem value="Credit Card">Credit Card</MenuItem>
-                    <MenuItem value=" Debit Card">Debit Card</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="TransactionDate"
-                name="TransactionDate"
-                value={addFormData.TransactionDate}
-                onChange={handleAddInputChange('TransactionDate')}
-                required
-              />
-            </Grid>
-           
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="status-label">Status</InputLabel>
-                <Select
-                  labelId="status-label"
-                  name="status"
-                  value={addFormData.status}
-                  onChange={handleAddInputChange('status')}
+        {/* Add Finance Modal  */}
+        <Modal open={addModalOpen} onClose={handleCloseAddModal}>
+          <Box sx={modalStyle}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                Add New Finance
+              </Typography>
+              <IconButton onClick={handleCloseAddModal}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={addFormData.name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only alphabets and spaces (optional)
+                    if (/^[a-zA-Z\s]*$/.test(value)) {
+                      handleAddInputChange("name")(e);
+                    }
+                  }}
                   required
-                > 
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Amount"
+                  name="amount"
+                  value={addFormData.amount}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleAddInputChange("amount")(e);
+                    }
+                  }}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Transaction Type</InputLabel>
+                  <Select
+                    label="Transaction Type"
+                    name="transactionType"
+                    value={addFormData.transactionType}
+                    onChange={handleAddInputChange("transactionType")}
+                    required
+                  >
+                    <MenuItem value="Income">Income</MenuItem>
+                    <MenuItem value="Expense">Expense</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Catogery</InputLabel>
+                  <Select
+                    label="catogery"
+                    name="catogery"
+                    value={addFormData.catogery}
+                    onChange={handleAddInputChange("catogery")}
+                    required
+                  >
+                    <MenuItem value="Available">Available</MenuItem>
+                    <MenuItem value="Sold">Sold</MenuItem>
+                    <MenuItem value="Rented">Rented</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Payment Mode</InputLabel>
+                  <Select
+                    label="Payment Mode"
+                    name="PaymentMode"
+                    value={addFormData.PaymentMode}
+                    onChange={handleAddInputChange("PaymentMode")}
+                    required
+                  >
+                    <MenuItem value="Cash">Cash</MenuItem>
+                    <MenuItem value="Bank">Bank Transfer</MenuItem>
+                    <MenuItem value="Upi">UPI</MenuItem>
+                    <MenuItem value="CreditCard">Credit Card</MenuItem>
+                    <MenuItem value="DebitCard">Debit Card</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Transaction Date"
+                  type="date"
+                  name="TransactionDate"
+                  value={addFormData.TransactionDate}
+                  onChange={handleAddInputChange("TransactionDate")}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    label="Status"
+                    name="status"
+                    value={addFormData.status}
+                    onChange={handleAddInputChange("status")}
+                    required
+                  >
                     <MenuItem value="Pending">Pending</MenuItem>
-                    <MenuItem value="Completed">Completed </MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
                     <MenuItem value="Cancled">Cancled</MenuItem>
-                 
-                </Select>
-              </FormControl>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="flex-end" gap={2}>
+                  <Button
+                    variant="standard"
+                    onClick={handleCloseAddModal}
+                    className="cancle"
+                    sx={{ color: "white", backgroundColor: "grey" }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleAddFinance}
+                    className="save"
+                    sx={{ color: "white", backgroundColor: "rgb(4,4,44)" }}
+                  >
+                    Save Finance
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="Lstatus-label"> Lease Status</InputLabel>
-                <Select
-                  labelId="Lstatus-label"
-                  name="Lstatus"
-                  value={addFormData.Lstatus}
-                  onChange={handleAddInputChange('Lstatus')}
-                  required
-                > 
-                <MenuItem value="Active">Active</MenuItem>
-                      <MenuItem value="Terminated">Terminated</MenuItem>
-                      <MenuItem value="Expired">Expired</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="flex-end" gap={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleCloseAddModal}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  onClick={handleAddFinance}
-                >
-                  Save Finance
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Modal>
-      </TableContainer>
+          </Box>
+        </Modal>
+      </div>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={Finances.length}
+        sx={{mt:-3}}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </>
   );
 };
 
-export default TableWithDropdown;
+export default TableWithDropdown ;

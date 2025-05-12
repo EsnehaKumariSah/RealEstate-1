@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+  InputLabel,
+  FormControl,
+  InputAdornment,
   Table,
+  Select,
+  MenuItem,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
-  Select,
-  Paper,
-  MenuItem,
   IconButton,
   Modal,
   Box,
@@ -16,8 +18,7 @@ import {
   TextField,
   Button,
   TableContainer,
-  FormControl,
-  InputLabel,
+  Paper,
 } from "@mui/material";
 import {
   Visibility,
@@ -25,56 +26,16 @@ import {
   Delete,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import axios from "axios";
-import { InputAdornment } from "@mui/material";
-
 import SearchIcon from "@mui/icons-material/Search";
+import TablePagination from "@mui/material/TablePagination";
 import AddIcon from "@mui/icons-material/Add";
-import { toast } from "react-toastify";
-import {useNavigate} from 'react-router-dom';
+import axios from "axios";
 
-const TableWithDropdown = () => {
-  const [data, setData] = useState([
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      email: "rahul@gmail.com",
-      phone: "23467889",
-      address: "Adityapur",
-      StartDate: "1st jan",
-      EndDate: " 1th april ",
-      MonthlyRent: "5000",
-      Deposite: "2000",
-      status: "Pending",
-      Lstatus: "Active",
-    },
-    {
-      id: 2,
-      name: "Neha Verma",
-      email: "neha@gmail.com",
-      phone: "9876543210",
-      address: "Ranchi",
-      StartDate: "2nd feb",
-      EndDate: " 1th march ",
-      MonthlyRent: "9000",
-      Deposite: "5000",
-      status: "Paid",
-      Lstatus: "Terminated",
-    },
-    {
-      id: 3,
-      name: "Amit Kumar",
-      email: "amit@gmail.com",
-      phone: "8765432109",
-      address: "Jamshedpur",
-      StartDate: "1st jan",
-      EndDate: " 1th april ",
-      MonthlyRent: "5500",
-      Deposite: "2000",
-      status: "OverDue",
-      Lstatus: "Expired",
-    },
-  ]);
+
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
+const LeaseTable = () => {
   const modalStyle = {
     position: "absolute",
     top: "50%",
@@ -86,141 +47,90 @@ const TableWithDropdown = () => {
     boxShadow: 24,
     p: 4,
     borderRadius: 1,
-    maxHeight: "70vh",
+    maxHeight: "90vh",
     overflow: "auto",
   };
 
   const deleteModalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    ...modalStyle,
     width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    borderRadius: 1,
-    textAlign: "center",
+    // textAlign: 'center'
   };
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedlease, setSelectedlease] = useState(null);
+  const [selectedLease, setSelectedLease] = useState(null);
   const [editFormData, setEditFormData] = useState({});
-  const [leases, setLeases] = useState([]);
+  const [Leases, setLeases] = useState([]);
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    StartDate: "",
+    EndDate: "",
+    MonthlyRent: "",
+    Deposite: "",
+    status: "",
+    Lstatus: "Active",
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [apiLeases, setApiLeases] = useState([]);
-  const [addFormData,setAddFormData] =useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    StartDate: '',
-    EndDate:'',
-    MonthlyRent:'',
-    Deposite:'',
-    status:'',
-    Lstatus: 'Active',
-    })
-    const [addModalOpen,setAddModalOpen]=useState(false);
-  
-    const navigate =useNavigate();
-  // const getAllLease = async()=>{
-  //   try{
-  //     const res = await axios.get(`http://localhost:3001/lease/getAllLease`);
-  //     console.log("response",res.data);
-  //     setLeases(res.data);
-  //   } catch(error){
-  //     console.log(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //      getAllLease();
-  //    }, []);
+
+  const navigate = useNavigate();
+  const handleAddLease = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:3001/Lease/createLease`,
+        addFormData
+      );
+      if (res.data.success) {
+        toast.success("Lease added successfully!");
+        handleCloseAddModal();
+        getAllLease();
+        //reset form data
+        setAddFormData({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+          StartDate: "",
+          EndDate: "",
+          MonthlyRent: "",
+          Deposite: "",
+          status: "",
+          Lstatus: "Active",
+        });
+      }
+    } catch (error) {
+      console.error("error adding Lease", error);
+      toast.error(error.res?.data?.message || "failed to add Lease");
+    }
+  };
   const getAllLease = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/lease/getAllLease`);
-      console.log("response", res.data);
+      const res = await axios.get(`http://localhost:3001/Lease/getAllLease`);
+      console.log(res.data);
       setLeases(res.data);
       setApiLeases(res.data);
     } catch (error) {
-      console.log(error);
+      console.log("error");
     }
   };
   useEffect(() => {
     getAllLease();
   }, []);
-
-  const handleView = (lease) => {
-    setSelectedlease(lease);
-    setViewModalOpen(true);
-  };
-
-  const handleEdit = (lease) => {
-    setSelectedlease(lease);
-    setEditFormData(lease);
-    setEditModalOpen(true);
-  };
-
-  const handleDelete = (lease) => {
-    setSelectedlease(lease);
-    setDeleteModalOpen(true);
-  };
-  const handleAddNew=()=>{
-    setAddModalOpen(true);
-  }
-
-  const handleCloseViewModal = () => setViewModalOpen(false);
-  const handleCloseEditModal = () => setEditModalOpen(false);
-  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
-  const handleCloseAddModal =()=> setAddModalOpen(false);
-
-  const handleEditInputChange = (field) => (event) => {
-    setEditFormData({
-      ...editFormData,
-      [field]: event.target.value,
-    });
-  };
-  const handleAddInputChange =(field) => (event) =>{
-    setAddFormData({
-      ...addFormData,
-      [field]:event.target.value,
-    });
-  };
-  const handleAddLease = async () => {
-    try {
-      const response = await axios.post('http://localhost:3001/lease/createLease', addFormData);
-      if (response.data.success) {
-        toast.success('lease added successfully!');
-        handleCloseAddModal();
-        getAllLease();
-        // Reset form data
-        setAddFormData({
-          name: '',
-          email: '',
-          phone: '',
-          address: '',
-          StartDate: '',
-          EndDate:'',
-          MonthlyRent:'',
-          Deposite:'',
-          status:'',
-          Lstatus: 'Active',
-        });
-      }
-    } catch (error) {
-      console.error('Error adding lease:', error);
-      toast.error(error.response?.data?.message || 'Failed to add lease');
-    }
-  };
   const handleUpdate = async () => {
     handleCloseEditModal();
-    // console.log("selected property ", selectedProperty);
-    
+    // console.log("selected Lease ", selectedLease);
+
     try {
       const res = await axios.put(
-       ` http://localhost:3001/lease/updateLease/${selectedlease._id}`, editFormData
+        `http://localhost:3001/Lease/updateLease/${selectedLease._id}`,
+        editFormData
       );
       if (res.data.success) {
         toast.success(res.data.message);
@@ -233,47 +143,66 @@ const TableWithDropdown = () => {
     }
   };
 
-
-  const handleConfirmDelete =  async() => {
-   
+  const handleConfirmDelete = async () => {
     handleCloseDeleteModal();
-    try{
-      const res=await axios.delete(`http://localhost:3001/lease/deleteLease/${selectedlease._id}`);
-      if(res.data.success){
+    try {
+      const res = await axios.delete(
+        `http://localhost:3005/Lease/deleteLease/${selectedLease._id}`
+      );
+      if (res.data.success) {
         toast.success(res.data.message);
         getAllLease();
       }
-    }catch(error){
-     console.log(error);
-     toast.error(error.response.data.message)
+    } catch (error) {
+      console.log(error);
+      toast.error(error.res.data.message);
     }
   };
-  const handleStatusChange = (id, newStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, status: newStatus } : row
-      )
-    );
+  const handleView = (Lease) => {
+    setSelectedLease(Lease);
+    setViewModalOpen(true);
   };
 
-  const handleLStatusChange = (id, newLStatus) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.id === id ? { ...row, Lstatus: newLStatus } : row
-      )
-    );
+  const handleEdit = (Lease) => {
+    setSelectedLease(Lease);
+    setEditFormData(Lease);
+    setEditModalOpen(true);
   };
 
-  // const handleDelete = (id) => {
-  //   setData((prevData) => prevData.filter((row) => row.id !== id));
-  // };
+  const handleDelete = (Lease) => {
+    setSelectedLease(Lease);
+    setDeleteModalOpen(true);
+  };
+  const handleOpenAddModal = () => setAddModalOpen(true);
+  const handleCloseAddModal = () => {
+    console.log("hello");
+    setAddModalOpen(false);
+  };
 
-  // const handleEdit = (id) => {
-  //   alert(`Edit function triggered for ID: ${id}`);
-  // };
+  const handleCloseViewModal = () => setViewModalOpen(false);
+  const handleCloseEditModal = () => setEditModalOpen(false);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
 
-  // const handleView = (id) => {
-  //   alert(`View function triggered for ID: ${id}`);
+  const handleEditInputChange = (field) => (e) => {
+    setEditFormData({ ...editFormData, [field]: e.target.value });
+  };
+  const handleAddInputChange = (field) => (e) => {
+    setAddFormData({
+      ...addFormData,
+      [field]: e.target.value,
+    });
+  };
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to first page
+  };
+  // const fieldLabels = {
+
+  //   // Add all other fields you want to show with custom labels
   // };
 
   const handleSearchChange = (e) => {
@@ -291,12 +220,12 @@ const TableWithDropdown = () => {
       return (
         lease.name.toLowerCase().includes(value) || // propertyTitle = gfdgf.includes(gfdgf)
         lease.email.toLowerCase().includes(value) ||
-        lease.phone.toString().toLowerCase().includes(value)|| 
-        lease.address.toLowerCase().includes(value)||
+        lease.phone.toString().toLowerCase().includes(value) ||
+        lease.address.toLowerCase().includes(value) ||
         lease.StartDate.toLowerCase().includes(value) ||
         lease.EndDate.toLowerCase().includes(value) ||
         lease.MonthlyRent.toString().toLowerCase().includes(value) ||
-        lease.Deposite.toString().toLowerCase().includes(value) 
+        lease.Deposite.toString().toLowerCase().includes(value)
       );
     });
 
@@ -305,538 +234,819 @@ const TableWithDropdown = () => {
 
   return (
     <>
-      <div className="flex">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end", // always right align
+          flexWrap: "wrap", // wrap on small screens
+          gap: 2,
+          mt: 1,
+          mb: 4,
+          px: 2, // padding for small screens
+        }}
+      >
         <TextField
-          //   className='search'
-
           label="Search"
           variant="outlined"
-          // fullWidth
           value={searchTerm}
+          size="small"
           onChange={handleSearchChange}
           InputProps={{
             startAdornment: (
-              <InputAdornment  sx={{color:"blue"}} position="start">
+              <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
             ),
           }}
-          style={{
-            marginBottom: "20px",
-            width: "160px",
-            display: "flex",
-            marginRight: "200px",
-            justifyContent: "flex-end",
-            marginLeft: "650px",
-            color:"blue"
+          sx={{
+            maxWidth: "160px",
+            width: "100%",
           }}
         />
 
         <Button
           variant="contained"
+          className="button"
           startIcon={<AddIcon />}
-          // color="primary"
-          onClick={handleAddNew}
-
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            display: "flex",
-            textWrap: "nowrap",
-            marginRight: "50px",
-          // padding: "10px 10px 10px 10px",
-           //paddingLeft:"10",
-            borderRadius: "5px",
-            height: "50px",
-            width: "130px",
+          onClick={handleOpenAddModal}
+          sx={{
+            // height: '50px',
+            maxWidth: "160px",
+            width: "100%",
+            backgroundColor: "rgb(4, 4,40)",
+            color: "#ffffff",
+            textTransform: "capitalize",
+            whiteSpace: "nowrap",
           }}
         >
           Add Lease
         </Button>
-      </div>
-      <TableContainer
-        component={Paper}
-        style={{ overflowX: "auto", maxWidth: 1070 }}
-      >
-        <Table className="w-full border border-gray-300">
-          {/* stickyHeader aria-label="sticky table" sx={{padding:"2px"}} */}
-          <TableHead
-            sx={{
-              position: "sticky",
-              top: "0",
-              zindex: "2",
-              background: "white",
-              fontSize: "15px",
-            }}
-          >
-            <TableRow className="bg-gray-200">
-              {[
-                "S.No",
-                "Name",
-                "email",
-                "Phone No.",
-                "Address",
-                "Lease Start Date",
-                "Lease End Date",
-                "Monthly Rent",
-                "Security Deposite",
-                "Payment Status",
-                "Lease Status",
-                "Action",
-              ].map((header) => (
+      </Box>
+
+      <div className="table">
+        <TableContainer
+          component={Paper}
+          style={{
+            marginTop: "0px",
+            maxHeight: "400px",
+            overflow: "auto",
+            maxWidth: 1300,
+            whiteSpace: "nowrap",
+            scrollbarWidth: "none",
+          }}
+        >
+          <Table className="w-full border border-gray-300 ">
+            <TableHead
+              sx={{
+                background: "white",
+                position: "sticky",
+                fontWeight: "bold",
+                top: 0,
+                zIndex: 2,
+              }}
+            >
+              {/* top:0 ka mtlb h ki table ke head ko upr rakhega and z index mtlb table container ke upr rakhega  */}
+              <TableRow className="bg-gray-200" border="1px solid black">
                 <TableCell
-                  key={header}
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
                   className="border p-2"
-                  sx={{ fontWeight: "bold", flex: "1", whiteSpace: "nowrap",paddingLeft:"20px" }}
                 >
-                  {header}
+                  S.No
                 </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {leases.length > 0 &&
-              leases.map((lease,index) => (
-                <TableRow
-                  key={lease._id}
-                  className="text-center"
-                  sx={{ whiteSpace: " nowrap" ,paddingLeft:"20px"}}
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
                 >
-                  <TableCell
+                  Name
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  {" "}
+                  Email
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Phone
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Address
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  {" "}
+                  Start Date
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  End Date
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  {" "}
+                  Monthly Rent
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Deposit
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Status
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  {" "}
+                  Lease Status
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", textAlign: "center" }}
+                  className="border p-2"
+                >
+                  Action
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Leases.length > 0 &&
+                Leases.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                ).map((Lease, index) => (
+                  <TableRow
+                    key={Lease.id}
+                    className="text-center"
                     sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                     
+                      fontWeight: "bold",
+                      transition: "all 0.3s ease",
+                      "&:hover": { backgroundColor: "rgba(12, 12, 101, 0.05)" },
                     }}
-                    className="border p-2"
                   >
-                    {index + 1}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.name}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.email}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.phone}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.address}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.StartDate}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.EndDate}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.MonthlyRent}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    {lease.Deposite}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                   {lease.status}
-                    
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "12px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                  {lease.Lstatus}
-                    
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      padding: "10px",
-                      fontSize: "10px",
-                      textAlign: "center",
-                    }}
-                    className="border p-2"
-                  >
-                    <TableContainer
-                      style={{
-                        display: "flex",
-                        gap: "5px",
-                        justifyContent: "center",
+                    <TableCell
+                      sx={{
+                        fontSize: "12px",
+                        textAlign: "center",
+                        padding: "4px",
                       }}
+                      className="border p-2"
                     >
-                      <IconButton
-                        onClick={() => handleView(lease)}
-                        sx={{ color: "blue" }}
+                      {index + 1}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.name}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.email}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.phone}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.address}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.StartDate}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.EndDate}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.MonthlyRent}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.Deposite}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.status}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        padding: "4px",
+                        textAlign: "center",
+                        fontSize: "12px",
+                      }}
+                      className="border p-2"
+                    >
+                      {Lease.Lstatus}
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: "bolder" }}
+                      className="border p-2"
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "5px",
+                          justifyContent: "center",
+                        }}
                       >
-                        <Visibility />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleEdit(lease)}
-                        sx={{ color: "green" }}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(lease)}
-                        sx={{ color: "red" }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableContainer>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        {/* View Modal */}
-        <Modal open={viewModalOpen} onClose={handleCloseViewModal}>
-          <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">lease Details</Typography>
-              <IconButton onClick={handleCloseViewModal}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            {selectedlease && (
-              <Grid container spacing={2}>
-                {Object.entries(selectedlease)
-              .filter(([field]) => field !== "_id" && field !== "__v" && field !== "createdAt"&& field !=="updatedAt")
-                .map(([key, value]) => (
-                  <Grid item xs={12} sm={6} key={key}>
-                    <Typography variant="subtitle1">
-                      <strong>{key}:</strong> {value}
-                    </Typography>
-                  </Grid>
+                        <IconButton
+                          sx={{ color: "blue" }}
+                          fontweight="bolder"
+                          className="view"
+                          onClick={() => handleView(Lease)}
+                        >
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "grey" }}
+                          className="edit"
+                          onClick={() => handleEdit(Lease)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "red" }}
+                          className="delete"
+                          onClick={() => handleDelete(Lease)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Grid>
-            )}
-          </Box>
-        </Modal>
-        {/* Edit Modal */}
-        <Modal open={editModalOpen} onClose={handleCloseEditModal}>
-          <Box sx={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">Edit lease</Typography>
-              <IconButton onClick={handleCloseEditModal}>
-                <CloseIcon />
-              </IconButton>
+            </TableBody>
+          </Table>
+
+          {/* View Modal */}
+          <Modal open={viewModalOpen} onClose={handleCloseViewModal}>
+            <Box sx={modalStyle}>
+              <Box display="flex" justifyContent="space-between">
+                <Typography sx={{ fontWeight: "bold" }} variant="h6">
+                  Lease Details
+                </Typography>
+                <IconButton onClick={handleCloseViewModal}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              {selectedLease && (
+                <Grid container spacing={2} mt={2}>
+                  {Object.entries(selectedLease)
+                    .filter(
+                      ([key]) =>
+                        key !== "__v" &&
+                        key !== "_id" &&
+                        key !== "updatedAt" &&
+                        key !== "createdAt"
+                    )
+                    .map(([key, value]) => (
+                      <Grid item xs={6} key={key}>
+                        <Typography>
+                          <strong>{key}:</strong> {value}
+                        </Typography>
+                      </Grid>
+                    ))}
+                </Grid>
+              )}
             </Box>
-            <Grid container spacing={2}>
-              {Object.keys(editFormData)
-              .filter((field) =>  field !== "_id" && field !== "createdAt" && field !== "updatedAt" && field !== "__v")
-              .map(
-                (field) =>
-                  field !== "id" && (
-                    <Grid item xs={12} sm={6} key={field}>
-                      {field==="status"? (
+          </Modal>
+
+          {/* Edit Modal */}
+          <Modal open={editModalOpen} onClose={handleCloseEditModal}>
+            <Box sx={modalStyle}>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="h6">Edit Lease</Typography>
+                <IconButton onClick={handleCloseEditModal}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <Grid container spacing={2} mt={2}>
+                {Object.keys(editFormData)
+                  .filter(
+                    (field) =>
+                      field !== "__v" &&
+                      field !== "_id" &&
+                      field !== "updatedAt" &&
+                      field !== "createdAt"
+                  )
+                  .map((field) => (
+                    <Grid item xs={6} key={field}>
+                      {/* Payment Status Dropdown */}
+                      {field === "status" ? (
                         <FormControl fullWidth>
-                          <InputLabel>
-                          Payment Status
-                          </InputLabel>
+                          <InputLabel>Payment Status</InputLabel>
                           <Select
-                          variant="standard"
-                          value={editFormData[field]||""}
-                          onChange={handleEditInputChange(field)}
+                            value={editFormData[field] || ""}
+                            onChange={handleEditInputChange(field)}
+                            label="Payment Status"
                           >
-                            <MenuItem value="pending">Pending</MenuItem>
-                            <MenuItem value="paid">Paid</MenuItem>
-                            <MenuItem value="overDue">OverDue</MenuItem>
+                            <MenuItem value="Paid">Paid</MenuItem>
+                            <MenuItem value="Unpaid">Unpaid</MenuItem>
+                            <MenuItem value="Partial">Partial</MenuItem>
                           </Select>
                         </FormControl>
-                      ): field ==="Lstatus" ?(
-                        <FormControl fullWidth>
-                          <InputLabel>
-                          Lease Status
-                          </InputLabel>
-                          <Select
-                          variant="standard"
+                      ) : field === "EndDate" ? (
+                        <TextField
+                          fullWidth
+                          //label=" LeaseEndDate"
+                          name="EndDate"
+                          type="Date"
                           value={editFormData[field] || ""}
-                          onchange={handleEditInputChange(field)}
+                          onChange={(e) => handleEditInputChange(field)(e)}
+                          required
+                        />
+                      ) : field === "StartDate" ? (
+                        <TextField
+                          fullWidth
+                          //label=" LeaseEndDate"
+                          name="StartDate"
+                          type="Date"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => handleEditInputChange(field)(e)}
+                          required
+                        />
+                      ) : field === "LStatus" ? (
+                        /* Lease Status Dropdown */
+                        <FormControl fullWidth>
+                          <InputLabel>Lease Status</InputLabel>
+                          <Select
+                            value={editFormData[field] || ""}
+                            onChange={handleEditInputChange(field)}
+                            label="Lease Status"
                           >
                             <MenuItem value="Active">Active</MenuItem>
-                            <MenuItem value="Terminated">Terminated</MenuItem>
                             <MenuItem value="Expired">Expired</MenuItem>
+                            <MenuItem value="Terminated">Terminated</MenuItem>
                           </Select>
                         </FormControl>
-                      ):(
-                      <TextField
-                        fullWidth
-                        label={field}
-                        value={editFormData[field] || ""}
-                        onChange={handleEditInputChange(field)}
-                      />
-                      )}
+                      ) : field === "name" ? (
+                        <TextField
+                          label="Name"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Allow only alphabets and spaces (optional)
+                            if (/^[a-zA-Z\s]*$/.test(value)) {
+                              handleEditInputChange("name")(e);
+                            }
+                          }}
+                          fullWidth
+                          variant="outlined"
+                        />
+                      ) : field === "email" ? (
+                        <TextField
+                          label="E-mail"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                              handleEditInputChange("email")(e);
+                            }
+                          }}
+                          fullWidth
+                          variant="outlined"
+                        />
+                      ) : field === "phone" ? (
+                        <TextField
+                          label="phone"
+                          type="tel"
+                          inputProps={{ maxLength: 10, pattern: "[0-9]{10}" }}
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d{0,10}$/.test(value)) {
+                              handleEditInputChange(field)(e);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = e.target.value;
+                            if (value.length !== 10) {
+                              alert("Phone number must be exactly 10 digits");
+                              // Optionally reset or mark as error
+                            }
+                          }}
+                          fullWidth
+                          variant="outlined"
+                          required
+                        />
+                      ) : field === "MonthlyRent" ? (
+                        <TextField
+                          label="MonthlyRent"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value)) {
+                              handleEditInputChange(field)(e);
+                            }
+                          }}
+                          fullWidth
+                          variant="outlined"
+                          required
+                        />
+                      ) : field === "Deposit" ? (
+                        <TextField
+                          label="Deposit"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value)) {
+                              handleEditInputChange(field)(e);
+                            }
+                          }}
+                          fullWidth
+                          variant="outlined"
+                          required
+                        />
+                      ) : field === "address" ? (
+                        <TextField
+                          label="Address"
+                          value={editFormData[field] || ""}
+                          onChange={(e) => {
+                            let value = e.target.value;
+
+                            if (field === "address") {
+                              // Allow blank or values starting with A-Za-z1-9
+                              if (value === "" || /^[A-Za-z1-9]/.test(value)) {
+                                // Auto-capitalize first letter
+
+                                value =
+                                  value.charAt(0).toUpperCase() +
+                                  value.slice(1);
+                              } else {
+                                return;
+                              }
+                            }
+                            // Use updated value
+                            handleEditInputChange(field)({
+                              ...e,
+                              target: { ...e.target, value },
+                            });
+                          }}
+                          fullWidth
+                          variant="outlined"
+                        />
+                      ) : null}
                     </Grid>
-                  )
-              )}
-            </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 2,
-                mt: 3,
-              }}
-            >
-              <Button variant="outlined" onClick={handleCloseEditModal}>
-                Cancel
-              </Button>
-              <Button variant="contained" onClick={handleUpdate}>
-                Update
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
-        {/* Delete Modal */}
-        <Modal open={deleteModalOpen} onClose={handleCloseDeleteModal}>
-          <Box sx={deleteModalStyle}>
-            <Typography variant="h6" gutterBottom>
-              Confirm Delete
-            </Typography>
-            <Typography sx={{ mb: 3 }}>
-              Are you sure you want to delete this lease?
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button variant="outlined" onClick={handleCloseDeleteModal}>
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleConfirmDelete}
-              >
-                Delete
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
-            {/* add lease model */}
-            <Modal open={addModalOpen} onClose={handleCloseAddModal}>
-        <Box sx={modalStyle}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" fontWeight="bold">Add New Lesae</Typography>
-            <IconButton onClick={handleCloseAddModal}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={addFormData.name}
-                onChange={handleAddInputChange('name')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="email"
-                name="email"
-                value={addFormData.email}
-                onChange={handleAddInputChange('email')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={addFormData.phone}
-                onChange={handleAddInputChange('phone')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Address"
-                name="address"
-                value={addFormData.address}
-                onChange={handleAddInputChange('address')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="StartDate"
-                name="StartDate"
-                value={addFormData.StartDate}
-                onChange={handleAddInputChange('StartDate')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="EndDate"
-                name="EndDate"
-                value={addFormData.EndDate}
-                onChange={handleAddInputChange('EndDate')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="MonthlyRent"
-                name="MonthlyRent"
-                value={addFormData.MonthlyRent}
-                onChange={handleAddInputChange('MonthlyRent')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Deposite"
-                name="Deposite"
-                value={addFormData.Deposite}
-                onChange={handleAddInputChange('Deposite')}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="status-label">Status</InputLabel>
-                <Select
-                  labelId="status-label"
-                  name="status"
-                  value={addFormData.status}
-                  onChange={handleAddInputChange('status')}
-                  required
-                > 
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="paid">Paid</MenuItem>
-                      <MenuItem value="overDue">OverDue</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel id="Lstatus-label"> Lease Status</InputLabel>
-                <Select
-                  labelId="Lstatus-label"
-                  name="Lstatus"
-                  value={addFormData.Lstatus}
-                  onChange={handleAddInputChange('Lstatus')}
-                  required
-                > 
-                <MenuItem value="Active">Active</MenuItem>
-                      <MenuItem value="Terminated">Terminated</MenuItem>
-                      <MenuItem value="Expired">Expired</MenuItem>
-                 
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="flex-end" gap={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleCloseAddModal}
+                  ))}
+              </Grid>
+              <Box display="flex" justifyContent="flex-end" mt={3}>
+                <Button
+                  variant="standard"
+                  className="cancle"
+                  onClick={handleCloseEditModal}
+                  sx={{ backgroundColor: "grey", color: "white" }}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  onClick={handleAddLease}
+                <Button
+                  variant="contained"
+                  onClick={handleUpdate}
+                  className="update"
+                  sx={{ ml: 2, backgroundColor: "rgb(4, 4,40)" }}
                 >
-                  Save lease
+                  Update
                 </Button>
               </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Modal>
-      </TableContainer>
+            </Box>
+          </Modal>
+
+          {/* Delete Modal */}
+          <Modal open={deleteModalOpen} onClose={handleCloseDeleteModal}>
+            <Box sx={deleteModalStyle}>
+              <Typography variant="h6">Confirm Delete</Typography>
+              <Typography my={2}>
+                Are you sure you want to delete this Lease?
+              </Typography>
+              <Box display="flex" justifyContent="flex-end" gap={2}>
+                <Button
+                  variant="standard"
+                  className="cancle"
+                  onClick={handleCloseDeleteModal}
+                  sx={{ color: "white", backgroundColor: "grey" }}
+                >
+                  CANCLE
+                </Button>
+                <Button
+                  variant="contained"
+                  className="delete1"
+                  color="error"
+                  sx={{backgroundColor:"red"}}
+                  onClick={handleConfirmDelete}
+                >
+                  DELETE
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+
+          {/* Add Lease Modal  */}
+          <Modal open={addModalOpen} onClose={handleCloseAddModal}>
+            <Box sx={modalStyle}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={2}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  Add New Lease
+                </Typography>
+                <IconButton onClick={handleCloseAddModal}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="name"
+                    name="name"
+                    value={addFormData.name}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only alphabets and spaces (optional)
+                      if (/^[a-zA-Z\s]*$/.test(value)) {
+                        handleAddInputChange("name")(e);
+                      }
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="E-mail"
+                    name="email"
+                    value={addFormData.email}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleAddInputChange("email")(e);
+
+                      // Optional: validate separately if needed
+                      if (
+                        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+                          value
+                        )
+                      ) {
+                        console.log("Valid email");
+                        handleAddInputChange("email")(e);
+                      } else {
+                        console.log("Invalid email");
+                      }
+                    }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Mobile No"
+                    name="phone"
+                    value={addFormData.phone}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d{0,10}$/.test(value)) {
+                        handleAddInputChange("phone")(e);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value;
+                      if (value.length !== 10) {
+                        alert("Phone number must be exactly 10 digits");
+                        // Optionally reset or mark as error
+                      }
+                    }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Address"
+                    name="address"
+                    value={addFormData.address}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Allow blank or values starting with A-Za-z1-9
+                      if (value === "" || /^[a-zA-Z0-9]*$/.test(value)) {
+                        // Auto-capitalize first letter
+
+                        value = value.charAt(0).toUpperCase() + value.slice(1);
+                      } else {
+                        return;
+                      }
+
+                      // Use updated value
+                      handleAddInputChange("address")({
+                        ...e,
+                        target: { ...e.target, value },
+                      });
+                    }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    // label="LeaseStartDate"
+                    name="StartDate"
+                    type="Date"
+                    value={addFormData.StartDate}
+                    onChange={handleAddInputChange("StartDate")}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    //label=" LeaseEndDate"
+                    name="EndDate"
+                    type="Date"
+                    value={addFormData.EndDate}
+                    onChange={handleAddInputChange("EndDate")}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label=" MonthlyRent"
+                    name="MonthlyRent"
+                    type="number"
+                    value={addFormData.MonthlyRent}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        handleAddInputChange("MonthlyRent")(e);
+                      }
+                    }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label=" Deposit"
+                    name="Deposit"
+                    // type="number"
+                    value={addFormData.Deposit}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        handleAddInputChange("Deposit")(e);
+                      }
+                    }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="furnishing-label">
+                      Payment Status
+                    </InputLabel>
+                    <Select
+                      name="status"
+                      label="Payment Status"
+                      value={addFormData.status}
+                      onChange={handleAddInputChange("status")}
+                      required
+                    >
+                      <MenuItem value="Paid">Paid</MenuItem>
+                      <MenuItem value="Unpaid">Unpaid</MenuItem>
+                      <MenuItem value="Partial">Partial</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="furnishing-label">Lease Status</InputLabel>
+                    <Select
+                      labelId="furnishing-label"
+                      label="Lease Status"
+                      name="LStatus"
+                      value={addFormData.LStatus}
+                      onChange={handleAddInputChange("LStatus")}
+                      required
+                    >
+                      <MenuItem value="Active">Active</MenuItem>
+                      <MenuItem value="Expired">Expired</MenuItem>
+                      <MenuItem value="Terminated">Terminated</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box display="flex" justifyContent="flex-end" gap={2}>
+                    <Button
+                      variant="standard"
+                      onClick={handleCloseAddModal}
+                      className="cancle"
+                      sx={{ backgroundColor: "grey", color: "white" }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      className="save"
+                      onClick={handleAddLease}
+                      sx={{ ml: 2, backgroundColor: "rgb(4, 4,40)" }}
+                    >
+                      Save Lease
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Modal>
+        </TableContainer>
+      </div>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        sx={{mt:-3}}
+        count={Leases.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </>
   );
 };
 
-export default TableWithDropdown;
+export default LeaseTable;

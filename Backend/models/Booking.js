@@ -7,12 +7,25 @@ const bookingSchema = new Schema({
    
     name:{type: String},
     email: {type:String},
-    phone: {type:Number},
+    mobileNo: {type:Number},
     address:{type: String},
-    checkIN :{type:String},
-    checkOut:{type:String},
-    status:{type:String},
-    Bstatus:{type:String},
+    check_in_date :{type:String},
+    check_out_date:{type:String},
+    TotalAmountUnit: {
+        type:String,
+        required: true,
+        min: 0,
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Active', 'Failed'],
+        default: 'Pending',
+    },
+    Bookingstatus: {
+        type: String,
+        enum: ['Confirmed', 'Cancelled', 'Completed'],
+        default: 'Confirmed',
+    },
   
 },
  { timestamps: true }); // Correct placement of timestamps

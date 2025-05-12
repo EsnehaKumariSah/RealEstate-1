@@ -7,7 +7,9 @@ const agentSchema = new Schema({
     
     name:{type: String},
     email:{type: String},
-    phone:{type:Number},
+    phone:{type:Number
+         
+    },
     address:{type: String},
      license:{type:Number} ,
       Experience:{type: String},

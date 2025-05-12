@@ -1,6 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SignUp from "./Auth/SignUp";
 import SignIn from "./Auth/SignIn";
 import Forgot from "./Auth/Forgot";
+
 import LayoutDashboard from "./Layout/LayoutDashboard";
 import LayoutProperty from "./Layout/LayoutProperty";
 import LayoutBooking from "./Layout/LayoutBooking";
@@ -9,24 +11,118 @@ import LayoutBuyers from "./Layout/LayoutBuyers";
 import LayoutLease from "./Layout/LayoutLease";
 import LayoutFinance from "./Layout/LayoutFinance";
 import LayoutSeller from "./Layout/LayoutSeller";
-import {ToastContainer} from "react-toastify";
+import LayoutProject from "./Layout/LayoutProject";
+import LayoutSiteVisit from "./Layout/LayoutSiteVisit";
+
+import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./Auth/AuthContext";
+import ProtectedRoute from "./Auth/ProtectedRoute";
+import PublicRoute from "./Auth/PublicRoute";
+
 function App() {
   return (
     <BrowserRouter>
-      <ToastContainer/>
-      <Routes>
-
-        <Route path="/SignIn" element={<SignIn />}/>
-        <Route path="/" element={<LayoutDashboard/>}/>
-        <Route path="/Forgot" element={<Forgot />}/>
-        <Route path="/Property" element={<LayoutProperty/>}/>
-        <Route path="/Booking" element={<LayoutBooking/>}/>
-        <Route path="/Agent" element={<LayoutAgent/>}/>
-        <Route path="/Buyers" element={<LayoutBuyers/>}/>
-        <Route path="/Lease" element={<LayoutLease/>}/>
-        <Route path="/Finance" element={<LayoutFinance/>}/>
-        <Route path="/Seller" element={<LayoutSeller/>}/>
-      </Routes>
+      <AuthProvider>
+        <ToastContainer />
+        <Routes>
+          {/* Public Routes */}
+          <Route 
+            path="/SignIn" 
+            element={
+              <PublicRoute>
+                <SignIn />
+              </PublicRoute>
+            } 
+          />
+          
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <LayoutDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Property"
+            element={
+              <ProtectedRoute>
+                <LayoutProperty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Booking"
+            element={
+              <ProtectedRoute>
+                <LayoutBooking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Agent"
+            element={
+              <ProtectedRoute>
+                <LayoutAgent />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buyers"
+            element={
+              <ProtectedRoute>
+                <LayoutBuyers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lease"
+            element={
+              <ProtectedRoute>
+                <LayoutLease />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance"
+            element={
+              <ProtectedRoute>
+                <LayoutFinance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller"
+            element={
+              <ProtectedRoute>
+                <LayoutSeller />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project"
+            element={
+              <ProtectedRoute>
+                <LayoutProject />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/SiteVisit"
+            element={
+              <ProtectedRoute>
+                <LayoutSiteVisit />
+              </ProtectedRoute>
+            }
+          />
+          {/* Redirect root to dashboard */}
+          <Route
+            path="/"
+            element={<Navigate to="/dashboard" replace />}
+          />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -6,7 +6,7 @@ const { Schema, model } = mongoose;
 const sellerSchema = new Schema({
     name: {type:String},
     email: {type:String},
-    phone: {type:Number},
+    phone: {type:Number , min:10},
     address: {type:String},
      Id:{type:String},
     ListedPrice:{type:Number},
