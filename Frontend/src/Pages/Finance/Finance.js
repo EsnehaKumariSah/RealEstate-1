@@ -443,18 +443,21 @@ const TableWithDropdown = () => {
                       >
                         <IconButton
                           sx={{ color: "blue" }}
+                          className="view"
                           onClick={() => handleView(Finance)}
                         >
                           <Visibility />
                         </IconButton>
                         <IconButton
                           sx={{ color: "grey" }}
+                          className="edit"
                           onClick={() => handleEdit(Finance)}
                         >
                           <Edit />
                         </IconButton>
                         <IconButton
                           sx={{ color: "red" }}
+                          className="delete"
                           onClick={() => handleDelete(Finance)}
                         >
                           <Delete />
